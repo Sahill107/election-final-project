@@ -1,8 +1,11 @@
+
 # load libraries
 library(kableExtra)                     # for printing tables
 library(cowplot)                        # for side by side plots
 library(lubridate)                      # for dealing with dates
 library(maps)                           # for creating maps
+library(flextable)                      # creating contingency tables
+library(corrplot)                       # creating correlation matrices
 library(tidyverse)
 library(tidyquant)
 
@@ -421,3 +424,81 @@ ggsave(
   width = 7,
   height = 4
 )
+
+###Explore associations
+##dataset contains mixed data types - create lists of categorical vs. numerical columns
+#named vector containing dtypes
+dtypes = sapply(colnames(master_data), function(x) class(master_data[[x]]))
+x_cats = dtypes[dtypes=='character'] %>%
+  names()
+x_cats = x_cats[-3]
+x_cts = dtypes[dtypes=='numeric'] %>%
+  names()
+y = master_data$leading_party
+
+##categorical variables
+#create 2-way contingency table
+desc_cont = proc_freq(master_data,"leading_party","urban_rural_desc")
+v2_desc_cont = table(master_data$leading_party, master_data$urban_rural_desc)
+#save as image
+save_as_image(desc_cont, path = "results/desc-cont.png")
+
+#balloonplot
+lpd <- master_data %>%
+  # Convert to long format
+  as_tibble() %>%
+  group_by(leading_party, urban_rural_desc) %>%
+  summarise(n())
+
+lpd_sp <- ggplot(lpd, aes(x = leading_party, y = urban_rural_desc)) +
+  geom_point(aes(size = `n()`), shape = 21, colour = "black", fill = "cornsilk") +
+  scale_size_area(max_size = 20, guide = FALSE) +
+  geom_text(aes(label = `n()`),
+    vjust = 3.2,
+    colour = "grey60",
+    size = 4
+  ) +
+  labs(x = 'Leading Party',
+       y = 'Urban/Rural Description',
+       title = 'County Type vs. Leading Party')
+#save as image
+ggsave(
+  filename = "results/urb-rural-lp.png",
+  plot = lpd_sp,
+  device = "png",
+  width = 7,
+  height = 9
+)
+
+#barplot
+desc_bar = master_data %>%
+  ggplot() +
+  aes(x = urban_rural_desc, fill = leading_party) +
+  geom_bar(position='fill')
+#save as image 
+ggsave(
+  filename = "results/desc-bar.png",
+  plot = desc_bar,
+  device = "png",
+  width = 9,
+  height = 9
+)
+
+#chi2 test of independence
+test <- chisq.test(master_data$leading_party, master_data$urban_rural_desc)
+#save results
+test_results = capture.output(print(test))
+writeLines(test_results, con = file("results/chi2_output.txt"))
+
+##numerical variables
+#drop numerical predictors relating to num. of Dem./Rep. votes
+x_cts = x_cts[-1:-12]
+#sort numerical predictors into categories
+health_covid_cts = x_cts[c(1:6,14,15,22:24)]
+demo_cts = x_cts[c(7:13,16:18,35:39)]
+socio_cts = x_cts[c(19:21,25,26,41:45)]
+
+#correlation matrix using corrplot
+nums = master_data %>% select(x_cts)
+corrMatrix = corrplot(cor(nums))
+#save
