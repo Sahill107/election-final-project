@@ -3,43 +3,56 @@ library(lubridate)
 library(tidyverse)
 library(janitor)
 
+# clean fips and state data
+states = states_raw %>% select(-st) %>%
+  rename(state = stname, state_code = stusps)
+fips_clean = subset(fips_raw,!(fips %% 1000 == 0)) %>%
+  mutate_all(~ gsub(" County", "", .)) %>%
+  rename(county = name,
+         state_code = state) %>%
+  na.omit()
+fips_clean$fips = sapply(fips_clean$fips, as.numeric)
+
 # clean election data
 election = election_raw %>%
   na.omit() %>%
   filter(year == 2020) %>%
   filter(mode == "TOTAL") %>%
-  select(-candidate, -office, -mode, -version,-year,-state_po) %>%
+  select(-candidate,-office,-mode,-version, -year, -state_po) %>%
   pivot_wider(names_from = party, values_from = candidatevotes) %>%
+  mutate(state = str_to_title(state)) %>%
+  mutate(county_name = str_to_title(county_name)) %>%
   rename(
-    democrat = DEMOCRAT,
-    libertarian = LIBERTARIAN,
-    republican = REPUBLICAN,
-    green = GREEN,
-    other = OTHER,
+    county = county_name,
+    Democrat = DEMOCRAT,
+    Libertarian = LIBERTARIAN,
+    Republican = REPUBLICAN,
+    Green = GREEN,
+    Other = OTHER,
     total_votes = totalvotes
   ) %>%
   mutate(
-    pct_dem = democrat / total_votes,
-    pct_rep = republican / total_votes,
-    pct_other = other / total_votes,
-    pct_green = green / total_votes,
-    pct_libertarian = libertarian / total_votes
+    pct_dem = Democrat / total_votes,
+    pct_rep = Republican / total_votes,
+    pct_other = Other / total_votes,
+    pct_green = Green / total_votes,
+    pct_libertarian = Libertarian / total_votes
   ) %>%
   rename(fips = county_fips)
 partytallies = election %>%
-  select(democrat, other, republican, green, libertarian)
+  select(Democrat, Other, Republican, Green, Libertarian)
 election = cbind(election, leading_party = colnames(partytallies)[apply(partytallies, 1, which.max)])
 
 # clean county health rankings data
 county_health = county_health_raw %>% row_to_names(row_number = 1)
-county_health = county_health[-1, ]
+county_health = county_health[-1,]
 CH_fips = county_health %>% select(fipscode)
 county_health = cbind(CH_fips, county_health[, grepl("rawvalue", names(county_health))])
 county_health = county_health[, apply(county_health, 2, function(x)
   ! any(is.na(x)))]
 county_health = county_health[, order(colnames(county_health))]
 county_health = county_health %>%
-  select(-v051_rawvalue, -v069_rawvalue) %>%
+  select(-v051_rawvalue,-v069_rawvalue) %>%
   rename(
     fips = fipscode,
     poor_fair_health = v002_rawvalue,
@@ -69,9 +82,8 @@ county_health = county_health %>%
     homeownership = v153_rawvalue,
     traffic_volume = v156_rawvalue
   )
-county_health = subset(county_health,!(endsWith(fips, '000')))
+county_health = subset(county_health, !(endsWith(fips, '000')))
 county_health = sapply(county_health, as.numeric)
-county_health[,-1] = scale(county_health[,-1])
 
 # clean COVID data
 str(COVID_raw)
@@ -80,7 +92,8 @@ COVID = COVID_raw %>% select(
   total_deaths = `Total deaths`,
   covid_deaths = `COVID-19 Deaths`,
   urban_rural_desc = `Urban Rural Description`
-)
+) %>%
+  mutate(pct_covid_deaths = covid_deaths/total_deaths)
 COVID = unique(COVID)
 
 # clean mask data
@@ -93,7 +106,6 @@ masks = masks_raw %>% rename(
   always = ALWAYS
 )
 masks = sapply(masks, as.numeric)
-masks[,-1] = scale(masks[,-1])
 
 # clean education data
 education = cbind(education_raw[, 1], education_raw[, 44:47])
@@ -105,21 +117,19 @@ education = education %>%
     pct_college_associates = `Percent of adults completing some college or associate's degree, 2015-19`,
     pct_bachelors_or_higher = `Percent of adults with a bachelor's degree or higher, 2015-19`
   )
-education = subset(education,!(endsWith(fips, '000')))
+education = subset(education, !(endsWith(fips, '000')))
 education = sapply(education, as.numeric)
-education[,-1] = scale(education[,-1])
 
 # clean population data
-population = population_raw[-c(1, 2, 3, 4), ]
-population = population %>% mutate_all( ~ gsub("Population ", "", .)) %>%
+population = population_raw[-c(1, 2, 3, 4),]
+population = population %>% mutate_all(~ gsub("Population ", "", .)) %>%
   select(fips = FIPStxt,
          year = Attribute,
          population = Value) %>%
   filter(year == 2020) %>%
   select(-year)
-population = subset(population,!(endsWith(fips, '000')))
+population = subset(population, !(endsWith(fips, '000')))
 population = sapply(population, as.numeric)
-population[,-1] = scale(population[,-1])
 
 # clean unemployment data
 unemployment = unemployment_raw %>%
@@ -127,7 +137,7 @@ unemployment = unemployment_raw %>%
     Attribute,
     "Median_Household_Income_2019|Unemployment_rate_2020"
   ))
-unemployment = unemployment[-c(1, 2), ]
+unemployment = unemployment[-c(1, 2),]
 unemployment = unemployment %>% pivot_wider(names_from = Attribute,
                                             values_from = Value) %>%
   select(
@@ -135,18 +145,19 @@ unemployment = unemployment %>% pivot_wider(names_from = Attribute,
     unemployment_rate = Unemployment_rate_2020,
     median_household_income = Median_Household_Income_2019
   )
-unemployment = subset(unemployment,!(fips %% 1000 == 0))
+unemployment = subset(unemployment, !(fips %% 1000 == 0))
 unemployment = sapply(unemployment, as.numeric)
-unemployment[,-1] = scale(unemployment[,-1])
 
 # clean poverty data
 poverty = poverty_raw %>% pivot_wider(names_from = Attribute,
                                       values_from = Value) %>%
-  select(fips = FIPStxt, poverty = POVALL_2019)
-poverty = subset(poverty,!(fips %% 1000 == 0))
-poverty[,-1] = scale(poverty[,-1])
+  mutate(log_poverty_rating = log10(POVALL_2019)) %>%
+  select(fips = FIPStxt, log_poverty_rating)
+poverty = subset(poverty, !(fips %% 1000 == 0))
 
-# inner join based on "fips"
+# make each cleaned data set a dataframe
+fips_clean = as.data.frame(fips_clean)
+states = as.data.frame(states)
 election = as.data.frame(election)
 county_health = as.data.frame(county_health)
 COVID = as.data.frame(COVID)
@@ -155,13 +166,43 @@ education = as.data.frame(education)
 population = as.data.frame(population)
 unemployment = as.data.frame(unemployment)
 poverty = as.data.frame(poverty)
-master_data = inner_join(x = election, y = county_health, by = "fips") %>%
-  inner_join(COVID, by = "fips") %>%
-  inner_join(masks, by = "fips") %>%
-  inner_join(education, by = "fips") %>%
-  inner_join(population, by = "fips") %>%
-  inner_join(unemployment, by = "fips") %>%
-  inner_join(poverty, by = "fips")
 
-# write clean data to file 
+
+# clean each data set further by joining additional geographical information
+fips_clean = inner_join(fips_clean, states, by = "state_code") %>% select(-state_code)
+county_health = inner_join(county_health, fips_clean, by = "fips")
+COVID = inner_join(COVID, fips_clean, by = "fips")
+masks = inner_join(masks, fips_clean, by = "fips")
+education = inner_join(education, fips_clean, by = "fips")
+population = inner_join(population, fips_clean, by = "fips")
+unemployment = inner_join(unemployment, fips_clean, by = "fips")
+poverty = inner_join(poverty, fips_clean, by = "fips")
+
+# create a master data set using inner join
+master_data = inner_join(x = election,
+                         y = (county_health %>% select(-county, -state)),
+                         by = "fips") %>%
+  inner_join((COVID %>% select(-county, -state)), by = "fips") %>%
+  inner_join((masks %>% select(-county, -state)), by = "fips") %>%
+  inner_join((education %>% select(-county, -state)), by = "fips") %>%
+  inner_join((population %>% select(-county, -state)), by = "fips") %>%
+  inner_join((unemployment %>% select(-county, -state)), by = "fips") %>%
+  inner_join((poverty %>% select(-county, -state)), by = "fips") %>%
+  mutate(pct_voters = total_votes / population, log_population = log10(population),
+         log_traffic_volume = log10(traffic_volume), log_covid_deaths = log10(covid_deaths),
+         log_total_deaths = log10(total_deaths))
+skew_check = skewness(master_data %>% dplyr::select(where(is.numeric)))
+master_data = master_data %>% select(-traffic_volume,-population,-covid_deaths,-total_deaths)
+
+#master_data[, c(16:43, 45:57)] = scale(master_data[, c(16:43, 45:57)])
+
+# write clean data to file
 write_csv(x = master_data, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/master_data.csv")
+write_csv(x = county_health, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/county_health.csv")
+write_csv(x = COVID, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/COVID.csv")
+write_csv(x = masks, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/masks.csv")
+write_csv(x = education, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/education.csv")
+write_csv(x = unemployment, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/unemployment.csv")
+write_csv(x = poverty, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/poverty.csv")
+
+
