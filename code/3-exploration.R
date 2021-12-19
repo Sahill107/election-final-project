@@ -1,4 +1,3 @@
-
 # load libraries
 library(kableExtra)                     # for printing tables
 library(cowplot)                        # for side by side plots
@@ -8,11 +7,17 @@ library(flextable)                      # creating contingency tables
 library(corrplot)                       # creating correlation matrices
 library(tidyverse)
 library(tidyquant)
+library(scales)
 
 # read in the cleaned data
-master_data = read_csv(
-  "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/master_data.csv"
-)
+master_data = read_csv("data/clean/master_data.csv")
+election = read_csv("data/clean/election.csv")
+county_health = read_csv("data/clean/county_health.csv")
+education = read_csv("data/clean/education.csv")
+poverty = read_csv("data/clean/poverty.csv")
+unemployment = read_csv("data/clean/unemployment.csv")
+COVID = read_csv("data/clean/COVID.csv")
+
 
 # create plot of # of counties for each party
 p = master_data %>%
@@ -27,7 +32,7 @@ p = master_data %>%
 
 # save the plot
 ggsave(
-  filename = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/reponse-plot.png",
+  filename = "results/response-plot.png",
   plot = p,
   device = "png",
   width = 5,
@@ -58,7 +63,7 @@ p = sum_votes %>%
 
 # save the plot
 ggsave(
-  filename = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/indiv-vote-plot.png",
+  filename = "results/indiv-vote-plot.png",
   plot = p,
   device = "png",
   width = 5,
@@ -86,7 +91,7 @@ master_data %>%
   ) %>%
   head(10) %>%
   write_tsv(
-    "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/top-10-dems-data.tsv"
+    "results/top-10-dems-data.tsv"
   )
 
 master_data %>%
@@ -109,7 +114,7 @@ master_data %>%
   ) %>%
   head(10) %>%
   write_tsv(
-    "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/top-10-reps-data.tsv"
+    "results/top-10-reps-data.tsv"
   )
 
 master_data %>%
@@ -132,7 +137,7 @@ master_data %>%
   ) %>%
   head(10) %>%
   write_tsv(
-    "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/top-10-other-data.tsv"
+    "results/top-10-other-data.tsv"
   )
 
 master_data %>%
@@ -155,7 +160,7 @@ master_data %>%
   ) %>%
   head(10) %>%
   write_tsv(
-    "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/top-10-voters-data.tsv"
+    "results/top-10-voters-data.tsv"
   )
 
 # create a map of election parties across the U.S.
@@ -196,7 +201,7 @@ p = map_data("county") %>%
   theme_void()
 
 ggsave(
-  filename = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/election-map.png",
+  filename = "results/election-map.png",
   plot = p,
   device = "png",
   width = 7,
@@ -240,7 +245,7 @@ p = map_data("county") %>%
   theme_void()
 
 ggsave(
-  filename = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/health-map.png",
+  filename = "results/health-map.png",
   plot = p,
   device = "png",
   width = 7,
@@ -285,7 +290,7 @@ p = map_data("county") %>%
   theme_void()
 
 ggsave(
-  filename = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/education-map.png",
+  filename = "results/education-map.png",
   plot = p,
   device = "png",
   width = 7,
@@ -329,7 +334,7 @@ p = map_data("county") %>%
   theme_void()
 
 ggsave(
-  filename = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/poverty-map.png",
+  filename = "results/poverty-map.png",
   plot = p,
   device = "png",
   width = 7,
@@ -374,7 +379,7 @@ p = map_data("county") %>%
   theme_void()
 
 ggsave(
-  filename = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/unemployment-map.png",
+  filename = "results/unemployment-map.png",
   plot = p,
   device = "png",
   width = 7,
@@ -418,7 +423,7 @@ p = map_data("county") %>%
   theme_void()
 
 ggsave(
-  filename = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/covid-map.png",
+  filename = "results/covid-map.png",
   plot = p,
   device = "png",
   width = 7,
@@ -474,7 +479,7 @@ lpd <- master_data %>%
 
 lpd_sp <- ggplot(lpd, aes(x = leading_party, y = urban_rural_desc)) +
   geom_point(aes(size = `n()`), shape = 21, colour = "black", fill = "cornsilk") +
-  scale_size_area(max_size = 20, guide = FALSE) +
+  scale_size_area(max_size = 20, guide = "none") +
   geom_text(aes(label = `n()`),
     vjust = 3.2,
     colour = "grey60",

@@ -9,20 +9,11 @@ library(cowplot)       # for side-by-side plots
 
 ###Data Preparation
 ##Read in data
-train = read_csv('data/clean/train_data.csv')
-test = read_csv('data/clean/test_data.csv')
-
-##Convert response to binary (Dem = 1, Rep = 0)
+train = read_csv("data/clean/train_data.csv")
 train = train %>% 
-  mutate(leading_party = as.numeric(leading_party == "Democrat"))
-test = test %>% 
-  mutate(leading_party = as.numeric(leading_party == "Democrat"))
-
-##Keep only relevant columns
-#container for column nails
-cols = colnames(train)
-train = train[cols[-c(1:14,41:44,55,62)]]
-test = test[cols[-c(1:14,41:44,55,62)]]
+  mutate(leading_party = as.numeric(leading_party == "Democrat")) %>% 
+  select(-state, -county, -fips, -total_votes, -Democrat, -Other, -Republican, -Green, -Libertarian, -pct_dem, -pct_rep, -pct_other, -pct_green, -pct_libertarian)
+train$urban_rural_desc = as.factor(train$urban_rural_desc)
 
 ###Decision Tree
 ##Growing the default tree
@@ -61,7 +52,7 @@ cv_plot = cp_table %>%
   scale_x_log10()
 theme_bw()
 #optimal tree
-set.seed(1)
+set.seed(1) 
 optimal_tree_info = cp_table %>%
   filter(xerror - xstd < min(xerror)) %>%
   arrange(nsplit) %>%
@@ -81,7 +72,7 @@ def_OOB_plot = tibble(oob_error = rf_fit$err.rate[,"OOB"],trees = 1:500) %>%
 
 ##Tuning the random forest
 #identify best value of m
-set.seed(2) # for reproducibility (DO NOT CHANGE)
+set.seed(1) # for reproducibility (DO NOT CHANGE)
 
 #test out 5 different ms
 poss_m = seq(1,57,length.out=5)
@@ -105,7 +96,7 @@ m_OOB_err_plot = m_OOB_err %>%
   xlab("Value of m") + ylab("OOB Error") +
   theme_bw()
 #tune using optimal m
-set.seed(2) # for reproducibility (DO NOT CHANGE)
+set.seed(1) # for reproducibility (DO NOT CHANGE)
 rf_fit3 = randomForest(factor(leading_party) ~ .,
                        mtry = 15,
                        importance = TRUE,
@@ -170,13 +161,16 @@ gbm_CV_errs = CV_errors %>%
 #Optimal number of trees
 gbm_fit_optimal = gbm_fit1
 optimal_num_trees = gbm.perf(gbm_fit1, plot.it = FALSE)
+
+##Need to save optimal num trees
 optimal_num_trees
+save(optimal_num_trees, file = "results/optimal_num_trees")
 #Save optimal fit
 save(gbm_fit_optimal, file = "results/gbm_fit.Rda")
 
 ###Interpretation
 ##Random forest
-#Variabe importance
+#Variable importance
 var_imp = varImpPlot(rf_fit3,n.var=10)
 
 ##Boosting

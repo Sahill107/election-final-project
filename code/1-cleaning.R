@@ -2,19 +2,19 @@
 library(lubridate)
 library(tidyverse)
 library(janitor)
-library(e1071)
+library(moments)
 
 # read raw data
-election_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/countypres_2000-2020.csv")
-county_health_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/county_health_rankings_2020.csv")
-COVID_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/covid.csv")
-masks_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/mask-use-by-county.csv")
-education_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/Education.csv")
-population_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/PopulationEstimates.csv")
-unemployment_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/Unemployment.csv")
-poverty_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/PovertyEstimates.csv")
-fips_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/state_and_county_fips_master.csv")
-states_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/states.csv")
+election_raw = read_csv("data/raw/countypres_2000-2020.csv")
+county_health_raw = read_csv("data/raw/county_health_rankings_2020.csv")
+COVID_raw = read_csv("data/raw/covid.csv")
+masks_raw = read_csv("data/raw/mask-use-by-county.csv")
+education_raw = read_csv("data/raw/Education.csv")
+population_raw = read_csv("data/raw/PopulationEstimates.csv")
+unemployment_raw = read_csv("data/raw/Unemployment.csv")
+poverty_raw = read_csv("data/raw/PovertyEstimates.csv")
+fips_raw = read_csv("data/raw/state_and_county_fips_master.csv")
+states_raw = read_csv("data/raw/states.csv")
 
 # clean fips and state data
 states = states_raw %>% select(-st) %>%
@@ -203,19 +203,15 @@ master_data = inner_join(x = election,
   inner_join((poverty %>% select(-county, -state)), by = "fips") %>%
   mutate(pct_voters = total_votes / population, log_population = log10(population),
          log_traffic_volume = log10(traffic_volume))
-master_data$urban_rural_desc = as.factor(master_data$urban_rural_desc)
-skew_check = skewness(master_data %>% dplyr::select(where(is.numeric)))
+skew_check = as.data.frame(skewness(master_data %>% select(where(is.numeric)), na.rm = TRUE))
 master_data = master_data %>% select(-traffic_volume,-population,-covid_deaths,-total_deaths)
-colnames(master_data)
 
 # write clean data to file
-write_csv(x = master_data, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/master_data.csv")
-write_csv(x = county_health, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/county_health.csv")
-write_csv(x = COVID, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/COVID.csv")
-write_csv(x = masks, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/masks.csv")
-write_csv(x = education, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/education.csv")
-write_csv(x = unemployment, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/unemployment.csv")
-write_csv(x = poverty, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/poverty.csv")
-write_csv(x = election, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/election.csv")
-
-
+write_csv(x = master_data, file = "data/clean/master_data.csv")
+write_csv(x = county_health, file = "data/clean/county_health.csv")
+write_csv(x = COVID, file = "data/clean/COVID.csv")
+write_csv(x = masks, file = "data/clean/masks.csv")
+write_csv(x = education, file = "data/clean/education.csv")
+write_csv(x = unemployment, file = "data/clean/unemployment.csv")
+write_csv(x = poverty, file = "data/clean/poverty.csv")
+write_csv(x = election, file = "data/clean/election.csv")

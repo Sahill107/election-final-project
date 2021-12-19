@@ -2,5 +2,5 @@
 	Pearson's Chi-squared test
 
 data:  master_data$leading_party and master_data$urban_rural_desc
-X-squared = 144.08, df = 5, p-value < 2.2e-16
+X-squared = 129.18, df = 5, p-value < 2.2e-16
 
