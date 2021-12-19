@@ -438,6 +438,26 @@ x_cts = dtypes[dtypes=='numeric'] %>%
   names()
 y = master_data$leading_party
 
+##predictions
+#majority class
+mean(master_data$leading_party=='Democrat')
+#majority class is Republican (~32.4% of observations are Democrat)
+
+#misclassification error for naive classifier?
+master_data %>% 
+  group_by(leading_party) %>%
+  count()
+#Democrat: 232
+#Republican: 484
+tp = 0
+tn = 484
+fp = 0
+fn = 232
+
+misclass_err = (fp+fn)/(fp+fn+tp+tn)
+print(misclass_err)
+#naive classifier always incorrectly predicts the observations that are Democrat
+
 ##categorical variables
 #create 2-way contingency table
 desc_cont = proc_freq(master_data,"leading_party","urban_rural_desc")
