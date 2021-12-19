@@ -8,18 +8,24 @@ library(flextable)                      # creating contingency tables
 library(corrplot)                       # creating correlation matrices
 library(tidyverse)
 library(tidyquant)
+library(scales)
 
 # read in the cleaned data
-master_data = read_csv(
-  "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/master_data.csv"
-)
+master_data = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/master_data.csv")
+train_data = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/train_data.csv")
+unemployment = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/unemployment.csv")
+poverty = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/poverty.csv")
+education = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/education.csv")
+county_health = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/county_health.csv")
+election = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/election.csv")
+COVID = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/COVID.csv")
 
 # create plot of # of counties for each party
-p = master_data %>%
+p = train_data %>%
   ggplot(aes(x = leading_party, fill = leading_party)) +
   stat_count(width = 0.5) +
   labs(x = "Political Party",
-       y = "Number of Counties") +
+       y = "Number of Counties from Train Data") +
   scale_fill_manual(breaks = c("Democrat", "Republican"),
                     values = c("blue", "red")) +
   theme_bw() +
@@ -27,7 +33,7 @@ p = master_data %>%
 
 # save the plot
 ggsave(
-  filename = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/reponse-plot.png",
+  filename = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/response-plot.png",
   plot = p,
   device = "png",
   width = 5,
@@ -36,16 +42,16 @@ ggsave(
 
 # create plot of # of total individual votes for each party
 sum_votes = cbind(as.data.frame(c(
-  sum(master_data$Democrat),
-  sum(master_data$Republican),
-  sum(master_data$Other, na.rm = TRUE)
+  sum(train_data$Democrat),
+  sum(train_data$Republican),
+  sum(train_data$Other, na.rm = TRUE)
 )),
 c("Democrat", "Republican", "Other"))
 colnames(sum_votes) = c("Counts", "Party")
 p = sum_votes %>%
   ggplot(aes(x = Party, y = Counts, fill = Party)) +
   labs(x = "Political Party",
-       y = "Number of Votes") +
+       y = "Number of Votes from Train Data") +
   geom_bar(stat = "identity") +
   scale_x_discrete(limits = c("Democrat", "Republican", "Other")) +
   scale_y_continuous(label = comma) +
@@ -66,7 +72,7 @@ ggsave(
 )
 
 # examine top 10 democratic, republican, and other counties as well as civically engaged counties
-master_data %>%
+train_data %>%
   select(county,
          state,
          pct_dem,
@@ -89,7 +95,7 @@ master_data %>%
     "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/top-10-dems-data.tsv"
   )
 
-master_data %>%
+train_data %>%
   select(county,
          state,
          pct_dem,
@@ -112,7 +118,7 @@ master_data %>%
     "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/top-10-reps-data.tsv"
   )
 
-master_data %>%
+train_data %>%
   select(county,
          state,
          pct_dem,
@@ -135,7 +141,7 @@ master_data %>%
     "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/top-10-other-data.tsv"
   )
 
-master_data %>%
+train_data %>%
   select(county,
          state,
          pct_dem,
