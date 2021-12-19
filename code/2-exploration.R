@@ -433,7 +433,6 @@ master_data = read_csv('data/clean/train_data.csv')
 dtypes = sapply(colnames(master_data), function(x) class(master_data[[x]]))
 x_cats = dtypes[dtypes=='character'] %>%
   names()
-x_cats = x_cats[-3]
 x_cts = dtypes[dtypes=='numeric'] %>%
   names()
 y = master_data$leading_party
@@ -462,8 +461,6 @@ print(misclass_err)
 #create 2-way contingency table
 desc_cont = proc_freq(master_data,"leading_party","urban_rural_desc")
 v2_desc_cont = table(master_data$leading_party, master_data$urban_rural_desc)
-#save as image
-save_as_image(desc_cont, path = "results/desc-cont.png")
 
 #balloonplot
 lpd <- master_data %>%
