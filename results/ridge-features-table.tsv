@@ -1,48 +1,48 @@
 feature	coefficient
-homeownership	-0.26696744285225393
-pct_nonhispanic_black	0.25049342625914434
-physical_inactivity	-0.20891058084949565
-log_poverty_rating	0.20611219065382838
-pct_bachelors_or_higher	0.205136130715726
-unemployment_rate	0.19858531369173676
-pct_nonhispanic_white	-0.1980607460238953
-severe_housing_issues	0.1887635034260427
-log_traffic_volume	0.1827269688411299
-always	0.1825709059758621
-pct_asian	0.18210149217168584
-pct_above_65	-0.18046033292020758
-sometimes	-0.1674600520865774
-frequently	-0.16586799539490218
-pct_high_school_diploma	-0.15859227833632455
-pct_covid_deaths	-0.15761146986817512
-pct_females	0.15594533544248024
-pct_voters	0.15490172291578932
-diabetes_prevalence	-0.15138594314418108
-pct_below_18	-0.14061906080286848
-log_population	0.13568603526852388
-pct_college_associates	-0.12316317908791884
-rarely	-0.11195569270412739
-adult_obesity	-0.10454326006878152
-excessive_drinking	0.10133065347155329
-pct_nonproficient_english	0.09499107810597342
-never	-0.08891787283731425
-food_insecurity	0.08359979273263438
-urban_rural_descLarge central metro	0.0777166232669947
-median_household_income	-0.07459566330844974
-pct_less_than_high_school	-0.06870236262105991
-social_associations	0.06638333175584778
-poor_mental_health_days	-0.06029869739176368
-urban_rural_descNoncore	-0.05919353461243279
-frequent_mental_distress	-0.04790250689089351
-urban_rural_descSmall metro	-0.04752626097909508
-urban_rural_descMedium metro	0.04684693036001041
-poor_fair_health	0.04103481249683417
-pct_pacific_islander	0.030283088121302267
-urban_rural_descLarge fringe metro	-0.024379506507781767
-poor_physical_health_days	-0.019220221712910837
-pct_native_american	0.009075695905009487
-insufficient_sleep	0.006108262723464072
-adult_smoking	0.005926928204953107
-frequent_physical_distress	0.00389007314996586
-pct_hispanic	-0.001209623945842348
-urban_rural_descMicropolitan	0.001137460761652886
+homeownership	-0.2608552659466166
+pct_nonhispanic_black	0.2413990381001532
+severe_housing_issues	0.22742997204503884
+log_traffic_volume	0.21734570946260137
+unemployment_rate	0.20958344591190164
+log_poverty_rating	0.20893398975774025
+pct_nonhispanic_white	-0.208661513702985
+physical_inactivity	-0.18979320046132134
+pct_bachelors_or_higher	0.1819794985816116
+frequently	-0.17893479980592883
+pct_females	0.17478478572126344
+always	0.17293565936340222
+pct_covid_deaths	-0.1681954771716076
+pct_asian	0.16411044088758647
+pct_high_school_diploma	-0.16183982743058062
+sometimes	-0.16128065893144036
+log_population	0.15288368237364713
+pct_above_65	-0.14487907205907227
+pct_voters	0.12702122195626084
+diabetes_prevalence	-0.12612120127091944
+pct_below_18	-0.12262922228674794
+excessive_drinking	0.12204551159494392
+pct_nonproficient_english	0.10825589457078019
+pct_college_associates	-0.10591899113686969
+adult_obesity	-0.10464993200095388
+never	-0.09321114942653234
+food_insecurity	0.08896890528666104
+pct_native_american	0.0772694317288617
+social_associations	0.0694607756850479
+urban_rural_descLarge central metro	0.0636728707961503
+rarely	-0.0634433630042073
+urban_rural_descNoncore	-0.05912498161033341
+poor_mental_health_days	-0.05701896565902579
+pct_pacific_islander	0.0370189560017635
+urban_rural_descLarge fringe metro	-0.03423723201039728
+pct_less_than_high_school	-0.0326501048450219
+median_household_income	-0.0323263462288747
+frequent_mental_distress	-0.03229939414879735
+urban_rural_descMedium metro	0.030293948797991334
+poor_physical_health_days	-0.019939175818513993
+frequent_physical_distress	0.017215119943365526
+poor_fair_health	0.011783808387922012
+adult_smoking	-0.010872383723671775
+urban_rural_descSmall metro	-0.006445207013990699
+urban_rural_descMicropolitan	-0.003935322866579739
+insufficient_sleep	-0.0019969253852320313
+pct_hispanic	0.0011393758439726337
