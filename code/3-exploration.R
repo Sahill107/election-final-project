@@ -5,6 +5,7 @@ library(lubridate)                      # for dealing with dates
 library(maps)                           # for creating maps
 library(flextable)                      # creating contingency tables
 library(corrplot)                       # creating correlation matrices
+library(Hmisc)
 library(tidyverse)
 library(tidyquant)
 library(scales)
@@ -520,27 +521,26 @@ writeLines(test_results, con = file("results/chi2_output.txt"))
 #drop numerical predictors relating to num. of Dem./Rep. votes
 x_cts = x_cts[-1:-12]
 
-#correlation matrix using corrplot
-nums = master_data %>% select(x_cts)
-corrMatrix = corrplot(cor(nums))
+#correlation matrix between explanatory variables
+cor1<-rcorr(as.matrix(master_data[x_cts]))
+#define flattening function
+flattenCorrMatrix <- function(cormat) {
+  ut <- upper.tri(cormat)
+  data.frame(
+    row = rownames(cormat)[row(cormat)[ut]],
+    column = rownames(cormat)[col(cormat)[ut]],
+    corr  =(cormat)[ut]
+  )
+}
+#flatten
+corrMatrix = flattenCorrMatrix(cor1$r)
 #focus on strongest correlations
-correlations = cor(nums) %>%
-  apply(1, round, digits=2)
-
-correlations[upper.tri(correlations)] <- NA # erase the upper triangle
-diag(correlations) <- NA 
-
-correlations %>%
-  as.data.frame() %>%
-  rownames_to_column("var") %>%
-  flextable::flextable() %>%
-  flextable::bg(j = 2:ncol(correlations), 
-                bg = function(x){
-                  out <- rep("transparent", length(x))
-                  out[x < -0.7 | x > 0.7] <- "light blue"
-                  out
-                })
-#save as image
+corrMatrix2 = corrMatrix %>%
+  filter(corr > 0.7 | corr < -0.7) 
+ordered_corrDF = corrMatrix2[order(corrMatrix2$corr), ] %>%
+  write_tsv(
+    "results/ordered_corrDF.tsv"
+  )
 
 #boxplots between num. explanatory variables and cat. response variables
 #explanatory variables span different categories (health, COVID, demographic & socioeconomic indicators)
