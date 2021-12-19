@@ -2,6 +2,7 @@
 library(lubridate)
 library(tidyverse)
 library(janitor)
+library(e1071)
 
 # read raw data
 election_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/countypres_2000-2020.csv")
@@ -201,12 +202,11 @@ master_data = inner_join(x = election,
   inner_join((unemployment %>% select(-county, -state)), by = "fips") %>%
   inner_join((poverty %>% select(-county, -state)), by = "fips") %>%
   mutate(pct_voters = total_votes / population, log_population = log10(population),
-         log_traffic_volume = log10(traffic_volume), log_covid_deaths = log10(covid_deaths),
-         log_total_deaths = log10(total_deaths))
+         log_traffic_volume = log10(traffic_volume))
+master_data$urban_rural_desc = as.factor(master_data$urban_rural_desc)
 skew_check = skewness(master_data %>% dplyr::select(where(is.numeric)))
 master_data = master_data %>% select(-traffic_volume,-population,-covid_deaths,-total_deaths)
-
-#master_data[, c(16:43, 45:57)] = scale(master_data[, c(16:43, 45:57)])
+colnames(master_data)
 
 # write clean data to file
 write_csv(x = master_data, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/master_data.csv")

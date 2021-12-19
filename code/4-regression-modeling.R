@@ -6,10 +6,13 @@ source("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/code/f
 
 # read in the training data and convert response to binary (Dem = 1, Rep = 0)
 train_data = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/train_data.csv")
-train_data = train_data %>% mutate(leading_party = as.numeric(leading_party == "Democrat"))
+train_data = train_data %>% 
+  mutate(leading_party = as.numeric(leading_party == "Democrat")) %>% 
+  select(-state, -county, -fips, -total_votes, -Democrat, -Other, -Republican, -Green, -Libertarian, -pct_dem, -pct_rep, -pct_other, -pct_green, -pct_libertarian)
+str(train_data)
 
 # run logistic regression
-glm_fit = glm(leading_party ~ . - state - county - fips - total_votes - Democrat - Other - Republican - Green - Libertarian - pct_dem - pct_rep - pct_other - pct_green - pct_libertarian,
+glm_fit = glm(leading_party ~ .,
               family = "binomial",
               data = train_data)
 beta_hat_std = as.data.frame(coef(glm_fit)) %>% rownames_to_column("feature") %>% rename(coefficient = `coef(glm_fit)`)
@@ -24,7 +27,7 @@ beta_hat_std[-1,] %>%
 
 # run ridge regression
 set.seed(2021)
-ridge_fit = cv.glmnet(leading_party ~ . - state - county - fips - total_votes - Democrat - Other - Republican - Green - Libertarian - pct_dem - pct_rep - pct_other - pct_green - pct_libertarian,   
+ridge_fit = cv.glmnet(leading_party ~ .,   
                       alpha = 0,                 
                       nfolds = 10,
                       family = "binomial",
@@ -60,7 +63,7 @@ beta_hat_std %>%
 
 # run lasso regression
 set.seed(2021)
-lasso_fit = cv.glmnet(leading_party ~ . - state - county - fips - total_votes - Democrat - Other - Republican - Green - Libertarian - pct_dem - pct_rep - pct_other - pct_green - pct_libertarian,   
+lasso_fit = cv.glmnet(leading_party ~ .,   
                       alpha = 1,
                       family = "binomial",
                       type.measure = "class",
