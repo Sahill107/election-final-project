@@ -68,7 +68,8 @@ optimal_tree_info = cp_table %>%
   head(1)
 optimal_tree_info
 optimal_tree = prune(tree = T_0, cp = optimal_tree_info$CP)
-
+#Save optimal tree
+save(optimal_tree, file = "results/dtr.Rda")
 ###Random Forest
 ##Default random forest
 #fit
@@ -113,6 +114,8 @@ rf_fit3 = randomForest(factor(leading_party) ~ .,
 optimal_OOB_err_plot = tibble(oob_error = rf_fit3$err.rate[,"OOB"],trees = 1:500) %>%
   ggplot(aes(x = trees, y = oob_error)) + geom_line() + theme_bw() +
   xlab("Number of Trees") + ylab("OOB Error")
+#Save optimal fit
+save(rf_fit3, file = "results/rf_fit.Rda")
 
 ###XGBoost
 ##Fit boosted tree models with interaction depths 1, 2, and 3
@@ -168,6 +171,8 @@ gbm_CV_errs = CV_errors %>%
 gbm_fit_optimal = gbm_fit1
 optimal_num_trees = gbm.perf(gbm_fit1, plot.it = FALSE)
 optimal_num_trees
+#Save optimal fit
+save(gbm_fit_optimal, file = "results/gbm_fit.Rda")
 
 ###Interpretation
 ##Random forest
