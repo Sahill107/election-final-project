@@ -8,24 +8,18 @@ library(flextable)                      # creating contingency tables
 library(corrplot)                       # creating correlation matrices
 library(tidyverse)
 library(tidyquant)
-library(scales)
 
 # read in the cleaned data
-master_data = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/master_data.csv")
-train_data = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/train_data.csv")
-unemployment = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/unemployment.csv")
-poverty = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/poverty.csv")
-education = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/education.csv")
-county_health = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/county_health.csv")
-election = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/election.csv")
-COVID = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/COVID.csv")
+master_data = read_csv(
+  "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/master_data.csv"
+)
 
 # create plot of # of counties for each party
-p = train_data %>%
+p = master_data %>%
   ggplot(aes(x = leading_party, fill = leading_party)) +
   stat_count(width = 0.5) +
   labs(x = "Political Party",
-       y = "Number of Counties from Train Data") +
+       y = "Number of Counties") +
   scale_fill_manual(breaks = c("Democrat", "Republican"),
                     values = c("blue", "red")) +
   theme_bw() +
@@ -33,7 +27,7 @@ p = train_data %>%
 
 # save the plot
 ggsave(
-  filename = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/response-plot.png",
+  filename = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/reponse-plot.png",
   plot = p,
   device = "png",
   width = 5,
@@ -42,16 +36,16 @@ ggsave(
 
 # create plot of # of total individual votes for each party
 sum_votes = cbind(as.data.frame(c(
-  sum(train_data$Democrat),
-  sum(train_data$Republican),
-  sum(train_data$Other, na.rm = TRUE)
+  sum(master_data$Democrat),
+  sum(master_data$Republican),
+  sum(master_data$Other, na.rm = TRUE)
 )),
 c("Democrat", "Republican", "Other"))
 colnames(sum_votes) = c("Counts", "Party")
 p = sum_votes %>%
   ggplot(aes(x = Party, y = Counts, fill = Party)) +
   labs(x = "Political Party",
-       y = "Number of Votes from Train Data") +
+       y = "Number of Votes") +
   geom_bar(stat = "identity") +
   scale_x_discrete(limits = c("Democrat", "Republican", "Other")) +
   scale_y_continuous(label = comma) +
@@ -72,7 +66,7 @@ ggsave(
 )
 
 # examine top 10 democratic, republican, and other counties as well as civically engaged counties
-train_data %>%
+master_data %>%
   select(county,
          state,
          pct_dem,
@@ -95,7 +89,7 @@ train_data %>%
     "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/top-10-dems-data.tsv"
   )
 
-train_data %>%
+master_data %>%
   select(county,
          state,
          pct_dem,
@@ -118,7 +112,7 @@ train_data %>%
     "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/top-10-reps-data.tsv"
   )
 
-train_data %>%
+master_data %>%
   select(county,
          state,
          pct_dem,
@@ -141,7 +135,7 @@ train_data %>%
     "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/top-10-other-data.tsv"
   )
 
-train_data %>%
+master_data %>%
   select(county,
          state,
          pct_dem,
@@ -482,7 +476,9 @@ ggsave(
 desc_bar = master_data %>%
   ggplot() +
   aes(x = urban_rural_desc, fill = leading_party) +
-  geom_bar(position='fill')
+  geom_bar(position='fill') +
+  scale_fill_manual(breaks = c("Democrat", "Republican"),
+                    values = c("blue", "red"))
 #save as image 
 ggsave(
   filename = "results/desc-bar.png",
@@ -524,4 +520,194 @@ correlations %>%
                 })
 #save as image
 
+#boxplots between num. explanatory variables and cat. response variables
+#explanatory variables span different categories (health, COVID, demographic & socioeconomic indicators)
+#pick a few from each category to inspect relationship with response
+#health
+health_box = master_data %>%
+  ggplot(aes(x=poor_fair_health, y=leading_party, fill=leading_party)) +
+  geom_boxplot() +
+  labs(x = "Proportion with Poor Health",
+       y = "Leading Party") +
+  scale_fill_manual(breaks = c("Democrat", "Republican"),
+                    values = c("blue", "red"))
+ggsave(
+  filename = "results/health-box.png",
+  plot = health_box,
+  device = "png",
+  width = 9,
+  height = 9
+)
+#covid
+covid_box = master_data %>%
+  ggplot(aes(x=pct_covid_deaths, y=leading_party, fill=leading_party)) +
+  geom_boxplot() +
+  labs(x = "Percent of Deaths due to COVID",
+       y = "Leading Party") +
+  scale_fill_manual(breaks = c("Democrat", "Republican"),
+                    values = c("blue", "red"))
+ggsave(
+  filename = "results/covid-box.png",
+  plot = covid_box,
+  device = "png",
+  width = 9,
+  height = 9
+)
 
+mask_hist = master_data %>%
+  select(sometimes, always, never, leading_party) %>%
+  group_by(leading_party) %>%
+  summarise(mean_sometimes = mean(sometimes),
+            mean_always = mean(always),
+            mean_never = mean(never)) 
+mask1 = mask_hist %>%
+  ggplot() +
+  geom_bar(aes(x=mean_sometimes,y=leading_party,fill=leading_party),stat='identity') +
+  labs(x = 'Mean Proportion of Response "Sometimes"',
+       y = 'Leading Party') +
+  scale_fill_manual(breaks = c("Democrat", "Republican"),
+                    values = c("blue", "red")) 
+mask2 = mask_hist %>%
+  ggplot() +
+  geom_bar(aes(x=mean_always,y=leading_party,fill=leading_party),stat='identity') +
+  labs(x = 'Mean Proportion of Response "Always"',
+       y = 'Leading Party') +
+  scale_fill_manual(breaks = c("Democrat", "Republican"),
+                    values = c("blue", "red")) 
+mask3 = mask_hist %>%
+  ggplot() +
+  geom_bar(aes(x=mean_never,y=leading_party,fill=leading_party),stat='identity') +
+  labs(x = 'Mean Proportion of Response "Never"',
+       y = 'Leading Party') +
+  scale_fill_manual(breaks = c("Democrat", "Republican"),
+                    values = c("blue", "red")) 
+plot_row = plot_grid(mask1,mask2,mask3)
+title = ggdraw() + 
+  draw_label(
+    "How often do you wear a mask?",
+    fontface = 'bold',
+    x = 0,
+    hjust = 0
+  ) + 
+  theme(
+    plot.margin = margin(0, 0, 0, 7))
+mask_behavior = plot_grid(title, plot_row)
+ggsave(
+  filename = "results/mask-bar.png",
+  plot = mask_behavior,
+  device = "png",
+  width = 20,
+  height = 9
+)
+#demographic/socioeconomic
+#a) education
+edu_box = master_data %>%
+  ggplot(aes(x=pct_bachelors_or_higher, y=leading_party, fill = leading_party)) +
+  geom_boxplot() +
+  labs(x = "% with Bach. Degree or Higher",
+       y = "Leading Party") +
+  scale_fill_manual(breaks = c("Democrat", "Republican"),
+                    values = c("blue", "red"))
+ggsave(
+  filename = "results/edu-box.png",
+  plot = edu_box,
+  device = "png",
+  width = 9,
+  height = 9
+)
+#b) income/socieconomic status
+income_box = master_data %>%
+  ggplot(aes(x=median_household_income, y=leading_party, fill=leading_party)) +
+  geom_boxplot() +
+  labs(x = "Median Household Income",
+       y = "Leading Party") +
+  scale_fill_manual(breaks = c("Democrat", "Republican"),
+                    values = c("blue", "red")) 
+ggsave(
+  filename = "results/income-box.png",
+  plot = income_box,
+  device = "png",
+  width = 9,
+  height = 9
+)
+unemp_box = master_data %>%
+  ggplot(aes(x=unemployment_rate, y=leading_party, fill=leading_party)) +
+  geom_boxplot() +
+  labs(x = "Unemployment Rate (%)",
+       y = "Leading Party") +
+  scale_fill_manual(breaks = c("Democrat", "Republican"),
+                    values = c("blue", "red"))
+ggsave(
+  filename = "results/unemp-box.png",
+  plot = unemp_box,
+  device = "png",
+  width = 9,
+  height = 9
+)
+#c) race/ethnicity
+race_box1 = master_data %>%
+  ggplot(aes(x=pct_nonhispanic_white, y=leading_party, fill=leading_party)) +
+  geom_boxplot() +
+  labs(x = "% Nonhispanic White Residents",
+       y = "Leading Party") +
+  scale_fill_manual(breaks = c("Democrat", "Republican"),
+                    values = c("blue", "red")) 
+race_box2 = master_data %>%
+  ggplot(aes(x=pct_nonhispanic_black, y=leading_party, fill=leading_party)) +
+  geom_boxplot()+
+  labs(x = "% Nonhispanic Black Residents",
+       y = "Leading Party") +
+  scale_fill_manual(breaks = c("Democrat", "Republican"),
+                    values = c("blue", "red")) 
+race_box3 = master_data %>%
+  ggplot(aes(x=pct_hispanic, y=leading_party, fill=leading_party)) +
+  geom_boxplot() +
+  labs(x = "% Hispanic Residents",
+       y = "Leading Party") +
+  scale_fill_manual(breaks = c("Democrat", "Republican"),
+                    values = c("blue", "red")) 
+race_box4 = master_data %>%
+  ggplot(aes(x=pct_asian, y=leading_party, fill=leading_party)) +
+  geom_boxplot() +
+  labs(x = "% Asian Residents",
+       y = "Leading Party") +
+  scale_fill_manual(breaks = c("Democrat", "Republican"),
+                    values = c("blue", "red")) 
+race_plots = plot_grid(race_box1,race_box2,race_box3,race_box4)
+ggsave(
+  filename = "results/race-plots.png",
+  plot = race_plots,
+  device = "png",
+  width = 9,
+  height = 9
+)
+#d) age
+age_box = master_data %>%
+  ggplot(aes(x=pct_above_65, y=leading_party, fill=leading_party)) +
+  geom_boxplot()+
+  labs(x = "% Residents Above 65",
+       y = "Leading Party") +
+  scale_fill_manual(breaks = c("Democrat", "Republican"),
+                    values = c("blue", "red")) 
+ggsave(
+  filename = "results/age-box.png",
+  plot = age_box,
+  device = "png",
+  width = 9,
+  height = 9
+)
+#e) gender
+gender_box = master_data %>%
+  ggplot(aes(x=pct_females, y=leading_party, fill=leading_party)) +
+  geom_boxplot()+
+  labs(x = "% Female Residents",
+       y = "Leading Party") +
+  scale_fill_manual(breaks = c("Democrat", "Republican"),
+                    values = c("blue", "red"))
+ggsave(
+  filename = "results/gender-box.png",
+  plot = gender_box,
+  device = "png",
+  width = 9,
+  height = 9
+)
