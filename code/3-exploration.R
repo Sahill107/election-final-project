@@ -549,7 +549,7 @@ ordered_corrDF = corrMatrix2[order(corrMatrix2$corr), ] %>%
 health_box = master_data %>%
   ggplot(aes(x=poor_fair_health, y=leading_party, fill=leading_party)) +
   geom_boxplot() +
-  labs(x = "Proportion with Poor Health",
+  labs(x = "Health Score",
        y = "Leading Party") +
   scale_fill_manual(breaks = c("Democrat", "Republican"),
                     values = c("blue", "red"))
