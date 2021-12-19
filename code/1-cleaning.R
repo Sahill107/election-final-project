@@ -215,3 +215,5 @@ write_csv(x = education, file = "data/clean/education.csv")
 write_csv(x = unemployment, file = "data/clean/unemployment.csv")
 write_csv(x = poverty, file = "data/clean/poverty.csv")
 write_csv(x = election, file = "data/clean/election.csv")
+
+rm(list=ls())

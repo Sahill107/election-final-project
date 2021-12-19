@@ -22,3 +22,5 @@ poverty_raw = read_csv("data/raw/PovertyEstimates.csv")
 # download fips data
 fips_raw = read_csv("data/raw/state_and_county_fips_master.csv")
 states_raw = read_csv("data/raw/states.csv")
+
+rm(list=ls())

@@ -52,7 +52,7 @@ cv_plot = cp_table %>%
   scale_x_log10()
 theme_bw()
 #optimal tree
-set.seed(1) 
+set.seed(471) 
 optimal_tree_info = cp_table %>%
   filter(xerror - xstd < min(xerror)) %>%
   arrange(nsplit) %>%
@@ -64,7 +64,7 @@ save(optimal_tree, file = "results/dtr.Rda")
 ###Random Forest
 ##Default random forest
 #fit
-set.seed(1) # for reproducibility (DO NOT CHANGE)
+set.seed(471) # for reproducibility (DO NOT CHANGE)
 rf_fit = randomForest(factor(leading_party) ~ ., data = train)
 #OOB error
 def_OOB_plot = tibble(oob_error = rf_fit$err.rate[,"OOB"],trees = 1:500) %>%
@@ -72,7 +72,7 @@ def_OOB_plot = tibble(oob_error = rf_fit$err.rate[,"OOB"],trees = 1:500) %>%
 
 ##Tuning the random forest
 #identify best value of m
-set.seed(1) # for reproducibility (DO NOT CHANGE)
+set.seed(471) # for reproducibility (DO NOT CHANGE)
 
 #test out 5 different ms
 poss_m = seq(1,57,length.out=5)
@@ -96,7 +96,7 @@ m_OOB_err_plot = m_OOB_err %>%
   xlab("Value of m") + ylab("OOB Error") +
   theme_bw()
 #tune using optimal m
-set.seed(1) # for reproducibility (DO NOT CHANGE)
+set.seed(471) # for reproducibility (DO NOT CHANGE)
 rf_fit3 = randomForest(factor(leading_party) ~ .,
                        mtry = 15,
                        importance = TRUE,
@@ -110,7 +110,7 @@ save(rf_fit3, file = "results/rf_fit.Rda")
 
 ###XGBoost
 ##Fit boosted tree models with interaction depths 1, 2, and 3
-set.seed(1) # for reproducibility (DO NOT CHANGE)
+set.seed(471) # for reproducibility (DO NOT CHANGE)
 #interaction depth 1
 gbm_fit1 = gbm(leading_party ~ .,
                distribution = "bernoulli",
@@ -120,7 +120,7 @@ gbm_fit1 = gbm(leading_party ~ .,
                cv.folds = 5,
                data = train)
 
-set.seed(1) # for reproducibility (DO NOT CHANGE)
+set.seed(471) # for reproducibility (DO NOT CHANGE)
 #interaction depth 2
 gbm_fit2 = gbm(leading_party ~ .,
                distribution = "bernoulli",
@@ -130,7 +130,7 @@ gbm_fit2 = gbm(leading_party ~ .,
                cv.folds = 5,
                data = train)
 
-set.seed(1) # for reproducibility (DO NOT CHANGE)
+set.seed(471) # for reproducibility (DO NOT CHANGE)
 #interaction depth 3
 gbm_fit3 = gbm(leading_party ~ .,
                distribution = "bernoulli",
@@ -189,3 +189,5 @@ p2 = plot(gbm_fit_optimal, i.var = "log_traffic_volume", n.trees = optimal_num_t
 p3 = plot(gbm_fit_optimal, i.var = "always", n.trees = optimal_num_trees)
 
 plot_grid(p1,p2,p3)
+
+rm(list=ls())

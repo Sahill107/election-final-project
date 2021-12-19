@@ -736,3 +736,5 @@ ggsave(
   width = 9,
   height = 9
 )
+
+rm(list=ls())

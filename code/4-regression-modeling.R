@@ -26,7 +26,7 @@ beta_hat_std[-1,] %>%
   write_tsv("results/glm-features-table.tsv")
 
 # run ridge regression
-set.seed(1)
+set.seed(471)
 ridge_fit = cv.glmnet(leading_party ~ .,   
                       alpha = 0,                 
                       nfolds = 10,
@@ -62,7 +62,7 @@ beta_hat_std %>%
   write_tsv("results/ridge-features-table.tsv")
 
 # run lasso regression
-set.seed(1)
+set.seed(471)
 lasso_fit = cv.glmnet(leading_party ~ .,   
                       alpha = 1,
                       family = "binomial",
@@ -95,3 +95,5 @@ beta_hat_std %>%
   filter(coefficient != 0) %>%
   arrange(desc(abs(coefficient))) %>% 
   write_tsv("results/lasso-features-table.tsv")
+
+rm(list=ls())

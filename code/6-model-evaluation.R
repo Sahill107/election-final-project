@@ -87,3 +87,5 @@ misclass_errs = tribble(
   "Boosting", gbm_mis_err
 )
 misclass_errs %>% write_csv("results/model-evaluation.csv")
+
+rm(list=ls())
