@@ -3,6 +3,18 @@ library(lubridate)
 library(tidyverse)
 library(janitor)
 
+# read raw data
+election_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/countypres_2000-2020.csv")
+county_health_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/county_health_rankings_2020.csv")
+COVID_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/covid.csv")
+masks_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/mask-use-by-county.csv")
+education_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/Education.csv")
+population_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/PopulationEstimates.csv")
+unemployment_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/Unemployment.csv")
+poverty_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/PovertyEstimates.csv")
+fips_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/state_and_county_fips_master.csv")
+states_raw = read_csv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/raw/states.csv")
+
 # clean fips and state data
 states = states_raw %>% select(-st) %>%
   rename(state = stname, state_code = stusps)
@@ -204,5 +216,6 @@ write_csv(x = masks, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election
 write_csv(x = education, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/education.csv")
 write_csv(x = unemployment, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/unemployment.csv")
 write_csv(x = poverty, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/poverty.csv")
+write_csv(x = election, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/data/clean/election.csv")
 
 
