@@ -13,10 +13,14 @@ glm_fit = glm(leading_party ~ . - state - county - fips - total_votes - Democrat
               family = "binomial",
               data = train_data)
 beta_hat_std = as.data.frame(coef(glm_fit)) %>% rownames_to_column("feature") %>% rename(coefficient = `coef(glm_fit)`)
+
+# save the glm fit object
+save(glm_fit, file = "/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/glm_fit.Rda")
+
+# extract features selected by glm and their coefficients
 beta_hat_std[-1,] %>%
   arrange(desc(abs(coefficient))) %>% 
   write_tsv("/Users/sahill/OneDrive - PennO365/STAT 471/election-final-project/results/glm-features-table.tsv")
-
 
 # run ridge regression
 set.seed(2021)
