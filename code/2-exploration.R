@@ -425,7 +425,9 @@ ggsave(
   height = 4
 )
 
-###Explore associations
+###Explore associations (train data only)
+##read in data
+master_data = read_csv('data/clean/train_data.csv')
 ##dataset contains mixed data types - create lists of categorical vs. numerical columns
 #named vector containing dtypes
 dtypes = sapply(colnames(master_data), function(x) class(master_data[[x]]))
@@ -493,12 +495,27 @@ writeLines(test_results, con = file("results/chi2_output.txt"))
 ##numerical variables
 #drop numerical predictors relating to num. of Dem./Rep. votes
 x_cts = x_cts[-1:-12]
-#sort numerical predictors into categories
-health_covid_cts = x_cts[c(1:6,14,15,22:24)]
-demo_cts = x_cts[c(7:13,16:18,35:39)]
-socio_cts = x_cts[c(19:21,25,26,41:45)]
 
 #correlation matrix using corrplot
 nums = master_data %>% select(x_cts)
 corrMatrix = corrplot(cor(nums))
-#save
+#focus on strongest correlations
+correlations = cor(nums) %>%
+  apply(1, round, digits=2)
+
+correlations[upper.tri(correlations)] <- NA # erase the upper triangle
+diag(correlations) <- NA 
+
+correlations %>%
+  as.data.frame() %>%
+  rownames_to_column("var") %>%
+  flextable::flextable() %>%
+  flextable::bg(j = 2:ncol(correlations), 
+                bg = function(x){
+                  out <- rep("transparent", length(x))
+                  out[x < -0.7 | x > 0.7] <- "light blue"
+                  out
+                })
+#save as image
+
+
