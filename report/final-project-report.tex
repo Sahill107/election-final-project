@@ -1,0 +1,802 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames*,x11names*}{xcolor}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Election Results and County Health, Demographic, and Socioeconomic Factors},
+  pdfauthor={Mahima Sangli, Sahill Yadav},
+  colorlinks=true,
+  linkcolor=Maroon,
+  filecolor=Maroon,
+  citecolor=Blue,
+  urlcolor=blue,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+\ifluatex
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{Election Results and County Health, Demographic, and Socioeconomic Factors}
+\author{Mahima Sangli, Sahill Yadav}
+\date{Dec 19, 2021}
+
+\begin{document}
+\maketitle
+
+{
+\hypersetup{linkcolor=}
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+\bigskip
+
+The code to reproduce this report is available \href{https://github.com/Katsevich-Teaching/final-project-template}{on Github}.
+
+\newpage
+
+\hypertarget{executive-summary}{%
+\section{Executive Summary}\label{executive-summary}}
+
+\textbf{Problem.} The rapid increase in political polarization in the United States over the past decade accompanies the rise of big data analytics, and its expansion into fields outside of tech. As topics such as broadening voter access and abolishing the electoral college become more hotly debated, the intersection between politics and analytics presents the unique opportunity to gain insight into the perspective of the American voter. Therefore, relying on county-level data, we aimed to analyze the relationship between election results in 2020 and various health, demographic, and socioeconomic characteristics of county residents. All of the data was collected in 2020, enabling us to examine the impact of the COVID-19 pandemic on voting behavior as well. Our main goal was to understand which factors have the largest influence over whether a county goes red or blue.
+
+\textbf{Data.} Our dataset pulled data from two sources: a New York Times time series dataset which includes cumulative counts of COVID-19 cases and deaths at the county level, and data from County Health Rankings \& Roadmaps, a program focused on collecting county-level data on a variety of health determinants. For the latter data source, we pulled 2019 or older data from various datasets on their website, as many key variables we wanted to study are still missing for 2020 and we assume that most county-level health determinants stayed very similar from 2019 to 2020. Our explanatory variables span the four main categories of health factors that the program identifies: health behaviors (e.g., smoking, sexual activity), clinical care (e.g., flu vaccine rate), social and economic factors (e.g., unemployment rate), and physical environment (e.g., degree of air pollution). Our primary response variable of interest was deaths per cases, which we created by dividing county-level deaths by count-level cases.
+
+\textbf{Analysis.} Since we pulled raw data from multiple sources, our analysis began with data wrangling and cleaning to ensure a usable dataset. Since we planned to build models and test their performance via prediction, we made sure to split our data into separate training and test datasets before conducting any exploratory analyses. Then, using the training set, we explored our response and explanatory variables, looking for skewness, potential multicollinearity, and possible relationships between the response and explanatory variables. To understand how to best model the data in order to make useful election result predictions, we drew on two key classes of machine learning methodologies: regression modeling and tree modeling. Of the three regression models we built, had the best performance. In the tree methods category, the random forest model had the lowest misclassification error.
+
+\textbf{Conclusions.} Interestingly, we found that the boosted and elastic net regression both pointed to similar types of variables as the strongest predictors of deaths per cases. Specifically, our optimal boosted model revealed that variables related to residential segregation and unemployment emerged as the most significant predictors, revealing that structural economic and health access inequalities were more predictive of COVID-19 deaths per cases than other variables. We hope that this analysis can inform policies aimed at improving health outcome determinants, both in the context of COVID-19 and more generally going forward.
+
+\hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
+
+\textbf{Background.} Under the two-party system, the political divide in the United States between right and left has grown rapidly. In the past, Americans have identified more closely with moderate political ideologies. However, according to a study conducted by Pew Research Center in 2014, the percentage of Americans who consider themselves to be strict conservatives or liberals has risen from 10\% to 21\% over the past 20 years.\footnote{``Political Polarization in the American Public.'' \url{https://www.pewresearch.org/politics/2014/06/12/political-polarization-in-the-american-public/}.} Moreover, the ideological gap between the political left and right has grown as well - the same study pointed to a shrinking list of issues that parties see eye-to-eye on as a symptom of this growing partisanship.\footnote{Ibid.} Interestingly, upon analyzing public opinion in other democracies, this seems to be a uniquely American trend. Americans' opinions of members of the opposing political parties have worsened faster than between citizens in countries like Canada, Australia, Germany, and the U.K.\footnote{``U.S. is polarizing faster than other democracies, study finds.'' \url{https://www.brown.edu/news/2020-01-21/polarization}}
+
+Simultaneously, key shifts in demographic and socioeconomic trends in the U.S. have important political implications. An aging population, unprecedented racial and ethnic diversity, and projections for sharp increases in immigration in the coming years are changing the makeup of the American voting population. Additionally, Americans find themselves grappling with a variety of modern issues. As the wealth gap widens, median household incomes have yet to reach their pre-recession level.\footnote{``Trends in Income and Wealth Inequality.'' \url{https://www.pewresearch.org/social-trends/2020/01/09/trends-in-income-and-wealth-inequality/}}. Health disparities, inequitable access to education, and racial discrimination are all social challenges that affect how American voters approach politics.\footnote{``Views of the major problems facing the country.'' \url{https://www.pewresearch.org/politics/2019/12/17/views-of-the-major-problems-facing-the-country/}}
+
+These coinciding political and demographic trends play out on the election stage, shaping how politicians and policymakers should interact with their constituents, and revealing what matters most to American voters.
+
+\textbf{Analysis goals.}In light of the amount of political diversity across the U.S., the rise in ideology-based partisanship, and the variety of factors that determine party identification, our objective for this analysis was to understand how county-level results from the 2020 presidential election were affected by various health, demographic, and socioeconomic characteristics. We sought to identify the variables in these categories that best predict which party wins in each county.
+
+\textbf{Significance.} By identifying the key factors that help determine winning political parties in different regions in the U.S., we hope to shed new light on the issue of political polarization; our analysis points to issues that are important political conflicts, lending insight into how to build bridges in an increasingly hostile political environment.
+
+\hypertarget{data}{%
+\section{Data}\label{data}}
+
+\hypertarget{data-sources}{%
+\subsection{Data sources}\label{data-sources}}
+
+Our dataset merged data from multiple sources: the MIT election lab for county election results, the CDC for COVID death rates by county, the NYT for mask usage by county, the USDA Economic Research Service for education, population, unemployment, and poverty data, and County Health Rankings and Roadmap for various other socio-economic data.
+
+The first dataset we consulted was the MIT Election Lab. Having county level votes from 1976 to 2020, the Election Lab is a clearinghouse for datasets that can fuel studies on elections and how they're conducted. This dataset was crucial in determining whether a county voted Democrat or Republican in the 2020 U.S. election in particular.\footnote{MIT Election Lab. Data. \url{https://electionlab.mit.edu/data}}
+
+The County Health Rankings and Roadmap data includes observations from 2020.\footnote{County Health Rankings \& Roadmaps. \url{https://www.countyhealthrankings.org/}} This program provides data, evidence, guidance, and examples to build awareness of the multiple factors that influence health and support community leaders working to improve health and increase health equity. In particular, the program considers all of the counties in the United States and has measures relating to health behaviors, clinical care, social and economic factors, and the physical environment.\footnote{County Health Rankings \& Roadmaps. 2021 Measures. \url{https://www.countyhealthrankings.org/explore-health-rankings/measures-data-sources/2021-measures}} Because we wanted to use as many features as possible, we also incorporated data from the USDA Economic Research Service. Specifically, they provided broader socioeconomic indicators like poverty rates, population change, unemployment rates, and education levels which vary geographically across states and counties. The USDA Economic Research Service data spanned across 1990 to 2020.\footnote{U.S. Department of Agriculture. Economic Research Service. \url{https://www.ers.usda.gov/data-products/county-level-data-sets/}}
+
+After we collected general socioeconomic data on the United States counties, we also wanted to consider how COVID played a role in the U.S. election. That is why we looked to the CDC and the NYT. The CDC was able to provide provisional COVID-19 deaths by county from the beginning of 2020 to the present (in this case, mid-December 2021). The NYT mask-wearing data comes from a large number of interviews conducted online. The survey asked a question about mask use in each county to obtain 250,000 survey responses between July 2, 2020 and July 14, 2020.\footnote{The New York Times Github. nytimes/covid-19-data. \url{https://github.com/nytimes/covid-19-data}}
+
+Finally, in order to clean the datasets nicely, we also used one table that matches a state's abbreviation with its full name\footnote{dataset State ANSI FIPS. dantonnoriega/us-state-ansi-fips.csv. \url{https://gist.github.com/dantonnoriega/bf1acd2290e15b91e6710b6fd3be0a53}} and another table that matches a county's FIPS code with it's county name and state abbreviation.\footnote{FIPS Codes. kjhealy/fips-codes. \url{https://github.com/kjhealy/fips-codes/blob/master/state_and_county_fips_master.csv}}
+
+\hypertarget{data-cleaning}{%
+\subsection{Data cleaning}\label{data-cleaning}}
+
+The cleaning process was quite intensive as we had to clean and then combine 10 different CSV files. We did some generic cleaning for all of the datasets. This means that we had to rename columns appropriately (some datasets had codes as their columns that required a data dictionary to be interpretable while others were in the incorrect casing). For some of the datasets, we had to get rid of any non-county observations, filter out all the non-2020 data, and omit any NA observations. The only way to get rid of non-county data was to look at the FIPS and see if it was divisible by 1000. That is because the country and each state have a FIPS that is divisible by 0 whereas individual counties do not. We only wanted county-level observations, so including state- and county-aggregate observations would have not been helpful.
+
+For the fips dataset, we renamed the columns more appropriately to represent the values they contained, and we also renamed the county values to get rid of the word ``County'' after each observation. Furthermore, we combined it with the states dataset, so that we could have the full names of the states rather than the abbreviations.
+
+For the election data, we only wanted to look at total votes in each county rather than ``2nd Absentee'', ``Absentee'', ``Early Voting'', etc. We also put all the character observations in title case. Furthermore, we used pivot\_wider to condense all the different party votes for a county into one observation. This greatly reduced the number of rows we had since each county was represented five times (one for each party: Democrat, Republican, Green, Libertarian, and Other). Next, we created new columns that determined the leading party (based on the highest number of votes in that county) and the percentage of the vote for each party (for data exploration later). We also removed unnecessary/redundant columns that weren't related to the fips, vote count, and the leading party.
+
+For the county health data, we had to remove a lot of columns with multiple NA observations because we wanted a full dataset when going through our modeling and predictions. We went from over 100 features to only 26 features from the county health rankings dataset. One small additional thing that had to be cleaned was that the first row contained all the column names and thus needed to be appropriately renamed.
+
+The COVID and mask data were a lot more straightforward to clean. For the COVID data, the only unique cleaning that had to be done was to create a new column that calculated the proportion of COVID deaths out of total deaths. The mask data only required generic cleaning.
+
+Regarding the USDA data, the education data had a lot of unnecessary columns and we only wanted the columns pertaining to the county's most recent education levels. For the population data, we had to alter column values from ``Population {[}Year{]}'' to just the year. Once we did that, we were able to do some generic cleaning as mentioned before. For the unemployment data, we wanted to filter for unemployment rate and median household income. Once we got those attributes only, we used pivot\_wider to provide the unemployment rate and median household income for each county, and then we did generic cleaning. For the poverty dataset, the only unique cleaning step was to log transform the poverty rating for each county since the observations were very positively skewed.
+
+After we cleaned these individual datasets, we had to do a bunch of inner\_joins calls. We used the clean FIPS dataset and individually joined them with each of the other datasets mentioned before. This was important because it provided clean state and county names for the various features in each dataset, which is important for assigning values to region and subregion when making country maps during the exploration step.
+
+Finally, we joined all of the data together in one larger ``master'' dataset. When doing so, we also added some new columns. We created a ``pct\_voters'' column (which calculates how much of the county population voted), a ``log\_population'' column (which is a log transformation of the population since it is heavily skewed), and a ``log\_traffic\_volume'' column (which is a log transformation of the traffic volume since it is heavily skewed).
+
+\hypertarget{data-description}{%
+\subsection{Data description}\label{data-description}}
+
+\hypertarget{observations}{%
+\subsubsection{Observations}\label{observations}}
+
+Our dataset has a total of 716 observations, corresponding to each of the counties included in our analysis.
+
+\hypertarget{response-variable}{%
+\subsubsection{Response Variable}\label{response-variable}}
+
+Our response variable is the leading party in each county in the U.S. We created this variable via a simple mutate operation that tallied the number of votes for each party and then chose the maximum number of votes. We use the leading party as a proxy for party preference for each county simply because that is how elections work for the most part. Naturally, this disadvantages counties where the party split is closer to 50-50, but this is the best way to put political preferences into a single response variable.
+
+\hypertarget{features}{%
+\subsubsection{Features}\label{features}}
+
+Drawing on data from County Health Rankings \& Roadmaps, we included 41 explanatory variables in our analysis, which fall into four main categories: health behaviors, clinical care, social and economic factors, and physical environment. For a detailed specification of these variables, refer to Appendix \ref{appendix}.
+
+\hypertarget{data-allocation}{%
+\subsection{Data allocation}\label{data-allocation}}
+
+As mentioned before, we removed variables from the dataset for which any of their observations had NA values. There were multiple variables that had mostly NA values as their observations, so it was the better option to simply remove the column altogether rather than remove only the rows that had NA values. Then, we split our master dataset into two subsets: a training dataset used for building our predictive models and a test dataset used for evaluating our models. We used an 80-20 split, such that the training dataset consists of 80\% of our observations and the test dataset consists of 20\% of our observations.
+
+\hypertarget{data-exploration}{%
+\subsection{Data exploration}\label{data-exploration}}
+
+\hypertarget{response}{%
+\subsubsection{Response}\label{response}}
+
+For the response, we wanted to understand the distribution of votes on a county basis and on an individual vote basis. As seen in the two plots below (Figure \ref{fig:county-level-vote-plot} and Figure \ref{fig:individual-vote-plot}), we see that a lot more counties voted Republican than Democrat, but a lot more people individually voted Democrat over Republican. This provides insight that a lot of the smaller counties preferred Donald Trump over Joe Biden while the larger counties (which tend to be more urban and densely populated) preferred Biden. We can also see from the response plot map (Figure \ref{fig:county-level-vote-plot}) that the country looks to be largely Republican over Democrat, with the coasts predominantly voting for Biden and the central U.S. voting for Trump. This is interesting considering that Biden ultimately won the election by a large margin.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.8\linewidth]{../results/response-plot} 
+
+}
+
+\caption{County Level Vote Distribution}\label{fig:county-level-vote-plot}
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.8\linewidth]{../results/indiv-vote-plot} 
+
+}
+
+\caption{Individual Level Vote Distribution}\label{fig:individual-vote-plot}
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.8\linewidth]{../results/election-map} 
+
+}
+
+\caption{Map of Leading Party}\label{fig:election-map}
+\end{figure}
+
+To get a bit more granular, we can also see the top 10 most Democrat, most Republican, and most civically engaged counties in our data set. As we see amongst the top 10 most concentrated Democrat-voting counties, there is a ton of variation in the state with a couple extremely large counties (like New York and Alameda) and other large-sized counties with voting populations in the hundreds of thousands. Among the top 10 most Republican counties, we see less variation in states, with Alabama and Texas showing up several times. Furthermore, there are no big counties among this list with a large showing of much smaller counties among this top 10 (counties reaching at most 40,000 voters). Amongst the top counties that have individuals who don't vote for either Republicans or Democrats, we see that that there are both really large counties (such as Davidson and Madison with hundreds of thousands of voters) and some small to mid-sized counties as well. One interesting thing to note is that Tennessee shows up many times in this list, indicating that Tennessee is not particularly polarized to a certain party (even though Tennessee ending up voting red in the 2020 election). Finally, amongst the most civically engaged counties (the counties who had the highest \% of their population vote), we see that some well-known swing states appeared on the list (Florida, Michigan, and Maine). Furthermore, the counties whose states are not particularly swing states have relatively close races, with some of them being a near 50-50 split. This indicates that the people of these counties felt some degree of voter efficacy when casting their ballot.
+
+\#\texttt{\{r\ top-10-dem,\ message\ =\ FALSE,\ echo\ =\ FALSE\}\ \#read\_tsv("../results/top-10-dems-data.tsv")\ \%\textgreater{}\%\ \#\ \ kable(format\ =\ "latex",\ row.names\ =\ NA,\ \ \#\ \ \ \ \ \ \ \ booktabs\ =\ TRUE,\ digits\ =\ 2,\ \ \#\ \ \ \ \ \ \ \ col.names\ =\ c("County",\ "State",\ "Case-fatality\ rate"),\ \#\ \ \ \ \ \ caption\ =\ "Top\ ten\ counties\ by\ case-fatality\ rate\ \ \#\ \ \ \ \ \ \ \ (expressed\ as\ a\ percentage).")\ \%\textgreater{}\%\ \#\ \ kable\_styling(position\ =\ "center")\ \#}
+
+\hypertarget{features-1}{%
+\subsubsection{Features}\label{features-1}}
+
+After understanding the variation in some of the individual features, we wanted to check for potential multicollinearity issues by looking at the covariation between features. In order to do this, we examined the correlation coefficients between the numerical features (all features in the dataset are numerical except 1).
+
+\begin{table}
+
+\caption{\label{tab:top-5-pos-corr}Top ten most positively correlated feature pairs}
+\centering
+\begin{tabular}[t]{llr}
+\toprule
+Feature 1 & Feature 2 & Correlation Coefficient\\
+\midrule
+log\_poverty\_rating & log\_population & 0.93\\
+frequent\_physical\_distress & frequent\_mental\_distress & 0.94\\
+poor\_physical\_health\_days & frequent\_mental\_distress & 0.95\\
+poor\_mental\_health\_days & frequent\_mental\_distress & 0.97\\
+poor\_physical\_health\_days & frequent\_physical\_distress & 0.98\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}
+
+\caption{\label{tab:top-5-neg-corr}Top ten most negatively correlated feature pairs}
+\centering
+\begin{tabular}[t]{llr}
+\toprule
+Feature 1 & Feature 2 & Correlation Coefficient\\
+\midrule
+pct\_high\_school\_diploma & pct\_bachelors\_or\_higher & -0.78\\
+frequent\_physical\_distress & median\_household\_income & -0.78\\
+poor\_physical\_health\_days & median\_household\_income & -0.77\\
+frequent\_mental\_distress & median\_household\_income & -0.77\\
+sometimes & always & -0.76\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+As we discussed earlier, our features fall into natural categories relating to the health, demographic, and socioeconomic information of each county's residents. We defined a strong correlation as one where the correlation coefficient is greater thatn 0.7 or less than -0.7. From calculating these correlation coefficients, it seems like the feature pairs with the highest absolute correlation coefficients often fall into the same category. For example, \texttt{pct\_high\_school\_diploma} and \texttt{pct\_bachelors\_or\_higher} have a strong negative correlation, likely because they imply opposite conclusions, and are both related to education. We used this insight to inform our model selection, opting for penalized regressions that drop or diminish features that don't meet a certain threshold, and tree models that circumvent multicollinearity issues altogether.
+
+\hypertarget{response-vs.-features}{%
+\subsubsection{Response vs.~Features}\label{response-vs.-features}}
+
+Since our response variable was categorical, and the majority of our explanatory variables were numerical, it was difficult to get a snapshot of the potential relationships through something like a correlation matrix. Instead, since we observed that features lying in the same natural categories (e.g.~health, demographics, etc.) tended to have moderate to strong correlations with each other, we decided to pick a few features from each category to plot against the response.
+
+\emph{Health}
+\#\texttt{\{r\ health-box,\ out.width\ =\ "80\%",\ fig.cap\ =\ "Distribution\ of\ health\ scores\ by\ leading\ party",\ fig.align=\textquotesingle{}center\textquotesingle{},\ echo\ =\ \#FALSE\}\ \#knitr::include\_graphics("../results/health-box.png")\ \#}
+
+High health score indicates a fair standard of health among residents across the county, while a low health score indicates a poor standard of health among residents across the county. This graph shows quite a bit of overlap between parties, but the mean health score for Democrat-won counties is slightly lower than for Republican-won counties. This is especially interesting given how many outliers there are towards the right end of the distribution (i.e.~the high scores) for Democrat-won counties.
+
+\emph{COVID}
+\#\texttt{\{r\ mask-bar,\ out.width\ =\ "80\%",\ fig.cap\ =\ "Distribution\ of\ mask\ survey\ responses\ by\ leading\ party",\ fig.align=\textquotesingle{}center\textquotesingle{},\ \#echo\ =\ FALSE\}\ \#knitr::include\_graphics("../results/mask-bar.png")\ \#}
+
+The variables in these graphs come from survey data about residents' mask habits in response to the COVID-19 pandemic. It is interesting to note that the mean proportion of people who responded ``Always'' is higher in Democrat-won counties than in Republican-won counties. However, the difference seems small, and the mean proportion of ``Always'' responses is higher for counties won by both parties than the mean proportion of any other response.
+
+\emph{Demographic/Socioeconomic}
+a) Education
+\textbackslash begin\{figure\}
+
+\{\centering \includegraphics[width=0.8\linewidth]{../results/edu-box}
+
+\}
+
+\textbackslash caption\{Distribution of \% bach. degree holders by leading party\}\label{fig:edu-box}
+\textbackslash end\{figure\}
+
+According to this boxplot, in Democrat-won counties, the average percentage of bachelor or advanced degree holders seems to be higher than in Republican-won counties; interestingly, there seem to be quite a few outliers to the right end of the distribution for Republican-won counties, indicating that in some instances, highly-educated citizens vote Republican.
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Race/Ethnicity
+  \textbackslash begin\{figure\}
+\end{enumerate}
+
+\{\centering \includegraphics[width=0.8\linewidth]{../results/race-plots}
+
+\}
+
+\caption{Distribution of race/ethnicity by leading party}
+
+\label{fig:race-plots}
+\textbackslash end\{figure\}
+
+Notably, there seems to be quite a bit of overlap between Democrat- and Republican-won counties for all races/ethnicities except for Asian residents; here, there seems to be a stark contrast where counties with higher percentages of Asian residents tend to go blue, whereas counties with lower percentages tend to go red.
+
+\hypertarget{modeling}{%
+\section{Modeling}\label{modeling}}
+
+\hypertarget{regression-based-methods}{%
+\subsection{Regression-based methods}\label{regression-based-methods}}
+
+\#\#\#Logistic Regression
+\emph{Training}
+As a baseline model, we began by building a logistic regression. We used the training set to fit a model that regressed \texttt{leading\_party} on all the other variables in the dataset. During our exploratory analysis, there were a few variables whose distributions demonstrated high skewness. We decided to perform a log transformation on these variables so that they approached a more normal distribution.
+
+\emph{Interpretation}
+The logistic regression contains 46 total parameters, excluding the intercept. Setting \(\alpha = 0.05\), there are 17 variables whose p-values meet that level of significance:
+\texttt{adult\_smoking}, \texttt{pct\_below\_18}, \texttt{pct\_above\_65}, \texttt{pct\_nonhispanic\_black}, \texttt{pct\_native\_american}, \texttt{pct\_hispanic}, \texttt{pct\_females}, \texttt{pct\_nonproficient\_english}, \texttt{physical\_inactivity}, \texttt{pct\_asian}, \texttt{pct\_nonhispanic\_white}, \texttt{social\_associations}, \texttt{urban\_rural\_descMedium\ metro}, \texttt{urban\_rural\_descMicropolitan},\texttt{pct\_covid\_deaths}, \texttt{log\_poverty\_rating}, \texttt{pct\_voters}
+
+\begin{table}
+
+\caption{\label{tab:model-comparison}Summary of logistic regression coefficients, standard errors, 
+        and p-values}
+\centering
+\begin{tabular}[t]{l}
+\toprule
+"Estimate" "Std. Error" "z value" "Pr(>|z|)"\\
+\midrule
+"(Intercept)" 993.193692419179 668.100718563562 1.48659276187365 0.137122400656584\\
+"poor\_fair\_health" 1.19408247228498 30.4493535285677 0.0392153636747884 0.968718684617461\\
+"adult\_smoking" 65.4598465642279 27.2900703485225 2.39866902973271 0.0164547800525637\\
+"adult\_obesity" 11.3166474899736 13.2109115838166 0.856613672582333 0.391658426916032\\
+"poor\_physical\_health\_days" -1.84845566901309 3.75695161604964 -0.492009442207484 0.622712668575294\\
+\addlinespace
+"poor\_mental\_health\_days" -1.68548179625824 3.36733086417124 -0.500539407692883 0.616695315193056\\
+"excessive\_drinking" 32.4445966803734 17.4122998867892 1.86331483441709 0.0624179842540619\\
+"pct\_below\_18" -134.509189441036 31.998135336313 -4.20365712024439 2.62636693318344e-05\\
+"pct\_above\_65" -97.7897826079015 23.3150752962242 -4.19427264829543 2.73748557697375e-05\\
+"pct\_nonhispanic\_black" -193.502996774405 54.5742913261164 -3.54568043070135 0.000391600794982832\\
+\addlinespace
+"pct\_native\_american" -175.881369440842 53.1206353947455 -3.31098015175924 0.000929698026374239\\
+"pct\_hispanic" -196.112725674195 54.0632043916578 -3.62747136210181 0.000286210508471342\\
+"pct\_females" 196.993603322813 50.3286813831374 3.9141419546274 9.07262519274038e-05\\
+"pct\_nonproficient\_english" 77.8667967705025 38.1558716212696 2.04075528776799 0.0412751568695436\\
+"diabetes\_prevalence" -19.1123240210079 21.5181787239394 -0.888194315429917 0.374436236047054\\
+\addlinespace
+"physical\_inactivity" -25.8350667496019 12.333199002384 -2.09475795733191 0.0361925142230476\\
+"pct\_pacific\_islander" -207.885816945061 205.529199369874 -1.01146609621607 0.311793400170659\\
+"pct\_asian" -185.659930628718 62.2702211648581 -2.98152033436963 0.00286820998186241\\
+"pct\_nonhispanic\_white" -220.26850119638 56.8054320875857 -3.87759573515361 0.000105493820670574\\
+"severe\_housing\_issues" -0.920636877703787 16.1920169927351 -0.0568574550111238 0.954658745437914\\
+\addlinespace
+"food\_insecurity" 11.5858974055457 20.3509236703819 0.569305727504027 0.569148680607624\\
+"social\_associations" 0.259070768836879 0.135219009349016 1.91593452787535 0.0553734298925944\\
+"insufficient\_sleep" -15.1280910896786 15.3004508103785 -0.988734990698249 0.322792818327034\\
+"frequent\_physical\_distress" -3.01162125974269 148.20996471608 -0.020319964757511 0.983788129501103\\
+"frequent\_mental\_distress" -96.1258240990582 147.808676149163 -0.650339524061847 0.515472932039574\\
+\addlinespace
+"homeownership" -7.75682956353936 9.16654981436366 -0.846210375836794 0.397435394698864\\
+"urban\_rural\_descLarge fringe metro" 0.967003833919043 1.62162750703015 0.596316866682914 0.550963565423445\\
+"urban\_rural\_descMedium metro" 3.54314772695089 1.6492173382928 2.14838132287562 0.0316834752751967\\
+"urban\_rural\_descMicropolitan" 4.86506050090942 2.08933361825439 2.32852257696121 0.019884371843011\\
+"urban\_rural\_descNoncore" -9.48027076335558 1156.31039205044 -0.00819872486534049 0.993458437298071\\
+\addlinespace
+"urban\_rural\_descSmall metro" 3.61970491614727 1.87971183894986 1.92567011663314 0.0541455775214776\\
+"pct\_covid\_deaths" -36.2492007474839 11.8166524819877 -3.06763703195462 0.00215758511661118\\
+"never" -321.403926909429 438.014472956157 -0.733774673563354 0.463086078620744\\
+"rarely" -336.732064305692 442.966540425682 -0.760174942292706 0.447150020979307\\
+"sometimes" -358.213672116252 441.923540415354 -0.810578390505233 0.417607830735978\\
+\addlinespace
+"frequently" -333.613682019507 441.25085160239 -0.75606354255861 0.449611099048383\\
+"always" -320.247342195904 441.276350028451 -0.725729675236971 0.468004506000355\\
+"pct\_less\_than\_high\_school" -5.14394804944245 5.23333138702133 -0.982920375002327 0.325646629038613\\
+"pct\_high\_school\_diploma" -5.06658308890194 5.24619855927522 -0.965762738801467 0.334162917549825\\
+"pct\_college\_associates" -5.26513178800015 5.2442865237768 -1.00397485227568 0.315390735087362\\
+\addlinespace
+"pct\_bachelors\_or\_higher" -5.24118682168861 5.24788596961872 -0.998723457794455 0.317928673853332\\
+"unemployment\_rate" 0.225664982705971 0.223922403321207 1.00778206806875 0.31355909630578\\
+"median\_household\_income" 4.57295923960218e-05 7.11942639919774e-05 0.642321302755161 0.520664585337755\\
+"log\_poverty\_rating" 13.27622467143 6.11949936548402 2.16949522804304 0.030045106258341\\
+"pct\_voters" 42.8257092501468 10.4518055711865 4.09744603058907 4.17733519161651e-05\\
+\addlinespace
+"log\_population" -10.768392748589 6.04664727932506 -1.78088653945612 0.0749309880284206\\
+"log\_traffic\_volume" 0.368847590115134 1.32831237418421 0.27768136267018 0.78125696859996\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+It is interesting to see that many of the race/ethnicity variables are significant predictors of election results, given the trend we noticed between \texttt{leading\_party} and \texttt{pct\_asian}. However, one potential concern is that more than half the variables are not statistically significant at even \(\alpha = 0.10\) despite having very high coefficient values. This is a sign that multicollinearity could be at play, a potential risk we noted in our exploratory analysis when certain features demonstrated strong correlations with each other.
+
+\#\#\#Penalized regression methods
+\emph{Training \& Tuning}
+The baseline logistic regression yielded several significant predictors, but with 46 parameters, there was high overfitting potential when it came to the test data. In order to balance the bias-variance tradeoff, and additionally to deal with the multicollinearity issues, we decided to apply two penalized methods: ridge and LASSO classifiers. We trained these cross-validated models on the same training dataset used to construct our earlier logistic regression. Additionally, for each model, we selected the tuning parameter \(\lambda\) according to the one standard error rule. Following this training and tuning process, the LASSO model contained the following 21 predictors:
+\texttt{homeownership},\texttt{pct\_bachelors\_or\_higher},\texttt{always},\texttt{log\_poverty\_rating},\texttt{unemployment\_rate},\texttt{physical\_inactivity},\texttt{pct\_nonhispanic\_black},\texttt{pct\_voters},\texttt{pct\_nonhispanic\_white},\texttt{diabetes\_prevalence},\texttt{pct\_asian},\texttt{pct\_covid\_deaths},\texttt{sometimes},\texttt{log\_traffic\_volume},\texttt{pct\_above\_65}, \texttt{pct\_females}, \texttt{frequently}, \texttt{severe\_housing\_issues}, \texttt{pct\_below\_18}, \texttt{excessive\_drinking}, \texttt{pct\_college\_associates}.
+
+\emph{Interpretation}
+Looking at the trace plots for the ridge and LASSO models, which highlight the top 6 most important features, it is interesting to examine the overlap across the three regression-based methods we used to approach this problem.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.8\linewidth]{../results/ridge-trace-plot} 
+
+}
+
+\caption{Ridge Trace Plot}\label{fig:ridge-trace}
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.8\linewidth]{../results/lasso-trace-plot} 
+
+}
+
+\caption{LASSO Trace Plot}\label{fig:lasso-trace}
+\end{figure}
+
+Notably, three features show up in the top 6 most important features for both the LASSO and ridge classifiers: \texttt{homeownership}, \texttt{pct\_bachelors\_or\_higher}, \texttt{log\_poverty\_rate}. Of these predictors \texttt{log\_poverty\_rate} was also a statistically significant predictor in the logistic regression. This overlap points to certain demographic/socioeconomic indicators, especially relating to education and income level, as particularly important in determining political party.
+
+\#\#Tree methods
+In addition to our regression-based methods, we also wanted to use a few tree-based models to attempt this classification question. Given our initial challenge with the logistic regression's requirement regarding multicollinearity, tree methods seemed like an appropriate next step. Given that the trees involved in these models are formed based not on assumptions about how the explanatory and response variables are related, but on an impurity measure at each split, these methods successfully avoid multicollinearity. This is especially helpful given the way our data falls into natural groupings.
+
+\hypertarget{decision-tree}{%
+\subsubsection{Decision tree}\label{decision-tree}}
+
+\emph{Training \& Tuning}
+We started out by constructing some classification trees to gain further insight into the relationship between the features and the response. This was our baseline classification tree:
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.8\linewidth]{../results/default-tree} 
+
+}
+
+\caption{Default Tree}\label{fig:default-tree}
+\end{figure}
+
+The \texttt{pct\_asian} variable is at the root node, reinforcing its importance as a predictor of \texttt{leading\_party} as noted in the exploratory analysis, and further solidified through the regression-based models.
+
+\emph{Interpretation}
+To avoid increasing bias by pruning this default tree, we fit the deepest possible tree. We then cross-validated and used the one standard error rule to pick the number of terminal nodes that would result in the optimal tree. This was the optimal tree:
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.8\linewidth]{../results/optimal-tree-plot} 
+
+}
+
+\caption{Optimal Tree}\label{fig:optimal-tree}
+\end{figure}
+
+Once again, the reappearance of several features that were important in previous models reinforces our earlier results.
+
+\hypertarget{random-forest}{%
+\subsubsection{Random forest}\label{random-forest}}
+
+\emph{Training and Tuning}
+Next, using the same training set, we fit a random forest model. In this case, there were two key tuning parameters:
+\texttt{mtry}, which represents the number of variables the model randomly samples to pick each split
+\texttt{ntree}, which represents the number of trees that should be used in determining each prediction
+In order to tune the random forest according to these parameters, we measured the out-of-bag error associated with different values of each parameter. The out-of-bag (OOB) error measures how well the random forest is able to predict values not included in the bootstrap samples used to train the forest. In this way, OOB error acts as a validation mechanism for the random forest model.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.8\linewidth]{../results/m_OOB_err_plot} 
+
+}
+
+\caption{OOB Error vs. Mtry Parameter}\label{fig:m-OOB-err-plot}
+\end{figure}
+
+Here we see that the optimal \texttt{mtry} value is 29, because that is where OOB error is minimized.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.8\linewidth]{../results/def_OOB_plot} 
+
+}
+
+\caption{OOB Error vs. Number of Trees}\label{fig:def-OOB-err-plot}
+\end{figure}
+
+Similarly, we see that OOB error begins to stabilize as \texttt{ntrees} approaches 500, meaning this is the optimal value for that parameter.
+
+\emph{Interpretation}
+In order to answer our research question, it is important to understand which variables the model highlights as important. With random forests, variable importance is determined by two key measures: mean decrease in accuracy, and mean decrease in Gini coefficient. The first signifies how much the model would lose in terms of accuracy by excluding a certain variable, and the second signifies how much a certain variable decreases impurity at a certain node.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.8\linewidth]{../results/rf-varimp} 
+
+}
+
+\caption{Variable Importance}\label{fig:rf-varimp}
+\end{figure}
+
+Looking at the variable importance plots, it is interesting to see how much the two overlap with each other, and how much these rankings overlap with the variable importance expressed by previous models. The following are variables that not only meet both of metrics of variable importance set out by the random forest model, but were also among the most
+important/significant features in previous models:
+\texttt{log\_traffic\_volume}, \texttt{log\_poverty\_rating}, \texttt{pct\_asian}, \texttt{always}, \texttt{homeownership}
+These variables reveal insight into a county's socioeconomic status, racial/ethnic composition, and COVID-19 reaction. Importantly, they also convey the particular relevance of these issues to election results.
+
+\hypertarget{boosting}{%
+\subsubsection{Boosting}\label{boosting}}
+
+\emph{Training \& Tuning}
+Lastly, we used our training dataset to fit a boosted model, which works by aggregating the predictions of multiple weak learners to form a strong predictive ability. Here, our key tuning parameter was interaction depth - this determines the maximum number of nodes for a decision tree. We tested interaction depths of 1, 2, and 3, plotting the number of trees at each depth against the cross-validation error to determine the optimal depth. We determined this value to be 3. Cross-validation error is minimized at an interaction depth of 3 and 133 trees.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.8\linewidth]{../results/gbm_CV_errs} 
+
+}
+
+\caption{Variable Importance}\label{fig:gbm-CV-errs}
+\end{figure}
+
+\emph{Interpretation}
+According to relative influence, the top three most important features in the boosted model are:
+\texttt{log\_traffic\_volume}, \texttt{log\_poverty\_rating}, and \texttt{severe\_housing\_issues}. Once again, these features overlap with important features highlighted by our earlier models.
+
+\begin{table}
+
+\caption{\label{tab:rel-inf}Relative Influence}
+\centering
+\begin{tabular}[t]{lr}
+\toprule
+var & rel.inf\\
+\midrule
+log\_traffic\_volume & 19.16\\
+log\_poverty\_rating & 9.24\\
+severe\_housing\_issues & 8.73\\
+pct\_bachelors\_or\_higher & 8.68\\
+pct\_asian & 5.95\\
+\addlinespace
+always & 5.13\\
+homeownership & 4.80\\
+never & 3.83\\
+pct\_nonhispanic\_white & 3.33\\
+physical\_inactivity & 2.84\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Taking these variables, we proceeded to create partial dependence plots. These plots demonstrate the marginal effect of a feature on the response variable. In the case of \texttt{log\_traffic\_volume}, we can see that as the log of the average traffic volume per meter of major roadways in the county increases, the election result is more likely to be Democrat. Similarly, with relation to the other plots, the election result also becomes more likely to be Democrat as the log of a county's poverty rating increases; as the proportion of the county facing severe housing issues or homelessness increases, so does the likelihood that the election result is Democrat.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.8\linewidth]{../results/part-dep-plots} 
+
+}
+
+\caption{Variable Importance}\label{fig:part-dep-plots}
+\end{figure}
+
+Taking a holistic view of the relationship between these three variables and the response, it seems like counties lacking access to robust public infrastructure seem to lean Democrat. It is possible, at least from the residents' point of view, that the Democratic Party's policy agenda is better suited to address the challenges arising from high levels of poverty, homelessness, and even traffic congestion.
+
+\hypertarget{conclusions}{%
+\section{Conclusions}\label{conclusions}}
+
+\hypertarget{method-comparison}{%
+\subsection{Method comparison}\label{method-comparison}}
+
+\begin{table}
+
+\caption{\label{tab:model-evaluation}Misclassification Errors}
+\centering
+\begin{tabular}[t]{lr}
+\toprule
+Method & Test Misclassification Errors\\
+\midrule
+Logistic & 0.13\\
+Ridge & 0.13\\
+Lasso & 0.13\\
+Decision Tree & 0.98\\
+Random Forest & 0.10\\
+\addlinespace
+Boosting & 0.13\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table \ref{tab:model-evaluation}
+
+\hypertarget{takeaways}{%
+\subsection{Takeaways}\label{takeaways}}
+
+Our results point to a few key determinants of health that, given their impact on COVID-19 deaths per cases rates in 2020, policymakers should consider when aiming to improve factors that would improve health overall but also potentially mitigate the mortality risk of another pandemic. The boosted model, which had the strongest predictive performance, suggests that residential segregation between non-white and white residents is the most important variable in predicting a county's COVID-19 deaths per cases rate. The unemployment rate, availability of physical exercise opportunities, and measures of home ownership burden variables were also highly important in this model. These variables are identified across all models suggesting these relationships are robust. Residential segregation, unemployment, and home ownership burden are socioeconomic factors that affect an individual's ability to access and pay for healthcare. In that regard, it is unsurprising that these factors would have a greater ability to predict differences in COVID-19 case fatalities across different counties in the United States. While some behavioral variables are also found to be significant (including STI incidence, high school completion, and others identified in the elastic net and lasso regressions), the variable importance ranking from the boosted model provides a highly interpretable hierarchy of the most influential factors from the greater set.
+
+Given that socioeconomic factors were the strongest predictors of deaths per cases, it appears that on the county level, COVID-19 rates are most associated with community healthcare burdens. That is, COVID-19 outcomes appear to reflect the reality of healthcare accessibility across counties; those with high percentages of uninsured citizens, or with high degrees of segregation and inequality, might feature division of healthcare resources that reflects these disparities. It is thus reasonable that deaths per case rates would be higher when significant groups of a population have lesser access to healthcare resources and treatment. Notably, if our conclusions are indeed correct, this effect would likely be pronounced in situations of scarcity such as the early months of the pandemic studied here, when many hospitals faced shortages of ventilators and other resource shortages. Given the progression of COVID-19 since 2021 as well as the inherent complexity of fatality incidence, we are hesitant to make any assertive claims about the true predictive capacity of any of the top factors we identified. Nonetheless, these results can help inform policies directed toward improving various determinants of important health outcomes in counties across the US.
+
+As the world shifts towards herd immunity as vaccines are made more widely available, it is important to reflect upon how the pandemic has asymmetrically impacted different counties across the country. Our results suggest that structural vulnerabilities can be captured by measures of inequality and poverty; the identification of counties high on these factors should serve as a warning for future vulnerability to health crises. These analyses can serve to protect already vulnerable communities from suffering disproportionately in the future.
+
+\hypertarget{limitations}{%
+\subsection{Limitations}\label{limitations}}
+
+\hypertarget{dataset-limitations}{%
+\subsubsection{Dataset limitations}\label{dataset-limitations}}
+
+One limitation is the fact that the consolidated dataset doesn't have the data for all 3,000+ counties in the dataset. We only have less than 25\% of the counties in the dataset accounted for. Many of our observations had to be removed as some of the R packages used to build some of our models required that no NA values were present in the data, which led to why we left out so many counties from our analysis. There is also some evidence of correlation amongst some of our explanatory variables. This means that some variables can be confounding variables, which would then mask or distort the relationship between measured variables. Also, variables selected in the LASSO regression and elastic net regression as well as variables marked important in the tree methods might be misleading in that, given how variable selection works, it is possible that some selected variables are simply representative of a larger group of correlated variables. Another limitation is that we have much fewer explanatory variables than we started with in the cleaning process. It would be ideal to have the full 100+ features from the County Health dataset, but due to too many columns having NA values, we had to scrap them. Removing the feature altogether was preferable to simply removing the observation because many observations had NAs for some columns.
+
+\hypertarget{analysis-limitations}{%
+\subsubsection{Analysis limitations}\label{analysis-limitations}}
+
+While splitting the data into training and testing datasets allows for a more unbiased test of the models, we recognize that our conclusions inherently contain some randomness due to the random split of the data. In other words, splitting the data again using a different random seed may have yielded different predictions and thus different misclassification errors. Next, although we provide different methods for robust interpretation of the variables, our analysis incorporates only a specific subset of health related variables. The results of the analysis might change dramatically if we were to incorporate other variables.
+
+\hypertarget{follow-ups}{%
+\subsection{Follow-ups}\label{follow-ups}}
+
+Regarding the study itself, we would like to find a better balance between removing observations vs.~features when there are many NAs present. Perhaps, we could clean the dataset to instead remove columns with a certain amount of NAs present (like 20+). That would help us balance having a lot of observations and a lot of features.
+
+For other matters to follow-up on, we would like to see other metrics that could predict party preferences. For instance, it would be interesting to examine the proportion of mail-in absentee voting in a county. It could be that counties with more mail-in/absentee voting would vote more towards the Democrat party. Furthermore, we'd like to look at data regarding social media consumption during the election and how time a county spent on each platform (e.g., Facebook, Instagram, Twitter, Tiktok, etc.). This could influence voting because we know that there was plenty of misinformation spread about the election through these platforms. We believe that spending time on platforms like Facebook (which have been repeatedly scorned for misinformation spreading and not validating it) could lead to more Trump votes. Another feature we'd like to study is the age distribution of voters. Perhaps it is that older citizens tend to vote for the Republican party and younger voters vote Democrat.
+
+\appendix
+
+\hypertarget{appendix}{%
+\section{Appendix: Descriptions of features}\label{appendix}}
+
+Below are the 41 features we used for analysis. Words written in parentheses represent variable names. Unless noted otherwise, all variables are continuous.
+
+\begin{itemize}
+\tightlist
+\item
+  \emph{Tobacco Use}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Adult smoking (\texttt{smoke\_perc}): Percentage of adults who are current smokers.
+  \end{itemize}
+\item
+  \emph{Diet and Exercise}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Adult obesity (\texttt{obesity\_perc}): Percentage of the adult population (age 20 and older) reporting a body mass index (BMI) greater than or equal to 30 kg/m2.
+  \item
+    Food environment index (\texttt{food\_environment}): Index of factors that contribute to a healthy food environment, from 0 (worst) to 10 (best).
+  \item
+    Physical inactivity (\texttt{inactive\_perc}): Percentage of adults age 20 and over reporting no leisure-time physical activity.
+  \item
+    Access to exercise opportunities (\texttt{physical\_exercise\_opportunities}): Percentage of population with adequate access to locations for physical activity
+  \item
+    Food insecurity (\texttt{Food\_Insecure\_perc}): Percentage of population who lack adequate access to food.
+  \item
+    Limited access to healthy foods (\texttt{limited\_healthy\_access}): Percentage of population who are low-income and do not live close to a grocery store.
+  \end{itemize}
+\item
+  \emph{Alcohol \& Drug Use}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Excessive Drinking (\texttt{drinking\_perc}): Percentage of adults reporting binge or heavy drinking.
+  \end{itemize}
+\item
+  \emph{Sexual Activity}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Sexually transmitted infections (\texttt{stis}): Number of newly diagnosed chlamydia cases per 100,000 population.
+  \item
+    Teen births (\texttt{teen\_births}): Number of births per 1,000 female population ages 15-19.
+  \item
+    Low Birth Weight Percentage (\texttt{low\_birthweight\_percentage}): Percentage of live births with low birthweight (\textless{} 2,500 grams).
+  \end{itemize}
+\item
+  \emph{Access to Care}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Uninsured (\texttt{uninsured}): Percentage of population under age 65 without health insurance.
+  \item
+    Primary care physicians (\texttt{primarycare\_ratio}): Ratio of population to primary care physicians.
+  \item
+    Dentists (\texttt{dentist\_ratio}): Ratio of population to dentists.
+  \item
+    Mental health providers (mentalhealth\_ratio): Ratio of population to mental health providers.
+  \item
+    Other primary care providers (\texttt{otherproviders\_ratio}): Ratio of population to primary care providers other than physicians.
+  \end{itemize}
+\item
+  \emph{Quality of Care}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Preventable hospital stays (\texttt{preventable\_hospitalization}): Rate of hospital stays for ambulatory-care sensitive conditions per 100,000 Medicare enrollees.
+  \item
+    Mammography screening (\texttt{mammogram\_perc}): Percentage of female Medicare enrollees ages 65-74 that received an annual mammography screening.
+  \item
+    Flu vaccinations (\texttt{flu\_vaccine\_perc}): Percentage of fee-for-service (FFS) Medicare enrollees that had an annual flu vaccination.
+  \item
+    Teen births (\texttt{teen\_births}): Number of births per 1,000 female population ages 15-19.
+  \end{itemize}
+\item
+  \emph{Education}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    High school completion (\texttt{HS\_completion}): Percentage of adults ages 25 and over with a high school diploma or equivalent.
+  \item
+    Some college (\texttt{some\_college}): Percentage of adults ages 25-44 with some post-secondary education.
+  \item
+    Disconnected youth (\texttt{disconnected\_youth}): Percentage of teens and young adults ages 16-19 who are neither working nor in school.
+  \end{itemize}
+\item
+  \emph{Employment}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Unemployment (\texttt{unemployment}): Percentage of population ages 16 and older who are unemployed but seeking work.
+  \end{itemize}
+\item
+  \emph{Income}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Children in poverty (\texttt{children\_poverty\_percent}): Percentage of people under age 18 in poverty.
+  \item
+    Income inequality (\texttt{income\_inequality}): Ratio of household income at the 80th percentile to income at the 20th percentile.
+  \item
+    Median household income (\texttt{median\_income}): The income where half of households in a county earn more and half of households earn less.
+  \item
+    Children eligible for free or reduced price lunch (\texttt{children\_freelunches}): Percentage of children enrolled in public schools that are eligible for free or reduced price lunch.
+  \end{itemize}
+\item
+  \emph{Family \& Social Support}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Children in single-parent households (\texttt{single\_parent\_households}): Percentage of children that live in a household headed by a single parent.
+  \item
+    Social associations (\texttt{social\_associations}): Number of membership associations per 10,000 residents.
+  \item
+    Residential segregation---Black/White (\texttt{segregation\_black\_white}): Index of dissimilarity where higher values indicate greater residential segregation between Black and White county residents.
+  \item
+    Residential segregation---non-White/White (\texttt{segregation\_nonwhite\_white}): Index of dissimilarity where higher values indicate greater residential segregation between non-White and White county residents.
+  \end{itemize}
+\item
+  \emph{Community Safety}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Violent crime rate (\texttt{Violent\_crime}) Number of reported violent crime offenses per 100,000 residents.
+  \end{itemize}
+\item
+  \emph{Air \& Water Quality}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Air pollution - particulate matter (\texttt{air\_pollution}): Average daily density of fine particulate matter in micrograms per cubic meter (PM2.5).
+  \item
+    Drinking water violations (\texttt{water\_violations}): Indicator of the presence of health-related drinking water violations. 1 indicates the presence of a violation, 0 indicates no violation.
+  \end{itemize}
+\item
+  \emph{Housing \& Transit}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Housing overcrowding (\texttt{housing\_overcrowding}): Percentage of households with overcrowding,
+  \item
+    Severe housing costs (\texttt{high\_housing\_costs}): Percentage of households with high housing costs
+  \item
+    Driving alone to work (\texttt{driving\_alone\_perc}): Percentage of the workforce that drives alone to work.
+  \item
+    Long commute---driving alone (\texttt{long\_commute\_perc}): Among workers who commute in their car alone, the percentage that commute more than 30 minutes.
+  \item
+    Traffic volume (\texttt{traffic\_volume}): Average traffic volume per meter of major roadways in the county.
+  \item
+    Homeownership (\texttt{homeownership}): Percentage of occupied housing units that are owned.
+  \item
+    Severe housing cost burden (\texttt{severe\_ownership\_cost}): Percentage of households that spend 50\% or more of their household income on housing.
+  \end{itemize}
+\end{itemize}
+
+\end{document}

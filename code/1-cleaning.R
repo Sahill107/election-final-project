@@ -99,7 +99,6 @@ county_health = subset(county_health, !(endsWith(fips, '000')))
 county_health = sapply(county_health, as.numeric)
 
 # clean COVID data
-str(COVID_raw)
 COVID = COVID_raw %>% select(
   fips = `FIPS Code`,
   total_deaths = `Total deaths`,
