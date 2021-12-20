@@ -1,6 +1,6 @@
 ---
-title: 'COVID-19 and County Health'
-author: 'Seokyoon Chang, Jessica Mixon, Greta Maayan Waldman (Edited by Eugene Katsevich)'
+title: 'Election Results and County Health, Demographic, and Socioeconomic Factors'
+author: 'Mahima Sangli, Sahill Yadav'
 date: 'May 2, 2021'
 output:
   bookdown::pdf_document2:
@@ -24,24 +24,26 @@ The code to reproduce this report is available [on Github](https://github.com/Ka
 
 # Executive Summary
 
-**Problem.** Despite the growing body of research focused on understanding the progression of COVID-19, there is still much to be learned about population-level health factors that make some populations more susceptible to COVID-19 spread, case severity, and mortality. Hence, for our final project, we decided to look into various measures of health across US counties and analyze which factors were most predictive of case fatality rate throughout 2020, the first year of the COVID-19 pandemic. While only analyzing 2020 COVID-19 data only inherently limits our results, we also note 2020 data may actually be most likely to reflect differences in healthcare quality across counties, as it was in the early months of the pandemic that many health systems faced unique issues of resource scarcity.
+**Problem.** The rapid increase in political polarization in the United States over the past decade accompanies the rise of big data analytics, and its expansion into fields outside of tech. As topics such as broadening voter access and abolishing the electoral college become more hotly debated, the intersection between politics and analytics presents the unique opportunity to gain insight into the perspective of the American voter. Therefore, relying on county-level data, we aimed to analyze the relationship between election results in 2020 and various health, demographic, and socioeconomic characteristics of county residents. All of the data was collected in 2020, enabling us to examine the impact of the COVID-19 pandemic on voting behavior as well. Our main goal was to understand which factors have the largest influence over whether a county goes red or blue.  
 
 **Data.** Our dataset pulled data from two sources: a New York Times time series dataset which includes cumulative counts of COVID-19 cases and deaths at the county level, and data from County Health Rankings & Roadmaps, a program focused on collecting county-level data on a variety of health determinants. For the latter data source, we pulled 2019 or older data from various datasets on their website, as many key variables we wanted to study are still missing for 2020 and we assume that most county-level health determinants stayed very similar from 2019 to 2020. Our explanatory variables span the four main categories of health factors that the program identifies: health behaviors (e.g., smoking, sexual activity), clinical care (e.g., flu vaccine rate), social and economic factors (e.g., unemployment rate), and physical environment (e.g., degree of air pollution). Our primary response variable of interest was deaths per cases, which we created by dividing county-level deaths by count-level cases.
 
-**Analysis.** Before exploring our data or running any analyses, we split our data into a training dataset and a test dataset, with the test dataset reserved for assessing and comparing model performance. Then, we explored our data to check for normality assumptions necessary for linear regression and to assess correlations between variables and between variables and the response. In order to build an optimal predictive model, we then built six different cross-validated models: ordinary least squares, ridge regression, LASSO regression, elastic net regression, random forest, and boosting. Of the regression models, elastic net had the lowest test error and of the tree-based models, the boosted model had the lowest test error (as well as the lowest test error overall).
+**Analysis.** Since we pulled raw data from multiple sources, our analysis began with data wrangling and cleaning to ensure a usable dataset. Since we planned to build models and test their performance via prediction, we made sure to split our data into separate training and test datasets before conducting any exploratory analyses. Then, using the training set, we explored our response and explanatory variables, looking for skewness, potential multicollinearity, and possible relationships between the response and explanatory variables. To understand how to best model the data in order to make useful election result predictions, we drew on two key classes of machine learning methodologies: regression modeling and tree modeling. Of the three regression models we built, had the best performance. In the tree methods category, the random forest model had the lowest misclassification error.
 
-**Conclusions.** Interestingly, we found that the boosted and elastic net regression both pointed to similar types of variables as the strongest predictors of deaths per cases. Specifically, our optimal boosted model revealed that variables related to residential segregation and unemployment emerged as the most significant predictors, revealing that structural economic and health access inequalities were more predictive of COVID-19 deaths per cases than other variables. We hope that this analysis can inform policies aimed at improving health outcome determinants, both in the context of COVID-19 and more generally going forward. 
+**Conclusions.** Interestingly, we found that the boosted and elastic net regression both pointed to similar types of variables as the strongest predictors of deaths per cases. Specifically, our optimal boosted model revealed that variables related to residential segregation and unemployment emerged as the most significant predictors, revealing that structural economic and health access inequalities were more predictive of COVID-19 deaths per cases than other variables. We hope that this analysis can inform policies aimed at improving health outcome determinants, both in the context of COVID-19 and more generally going forward.
 
 # Introduction
 
-**Background.** Coronavirus disease (COVID-19) has had a devastating global impact, with a cumulative total of 149,987,772 confirmed cases and 3,157,594 deaths worldwide as of April 28, 2021.^[Coronavirus Cases: Worldometer. (n.d.). https://www.worldometers.info/coronavirus/. 
-] About a fifth of these cases have been in the United States, with a recent count of 32,551,440 cases and 582,668 deaths.^[Ibid.] With these staggering numbers still increasing despite recent large-scale vaccine rollouts, it is of vital importance to utilize various data sources to understand both the progression of COVID-19 thus far as well as the highest risk factors for contracting COVID-19. Furthermore, a thorough analysis of COVID-19 rates and predictive factors may help inform strategies to improve public health policies that could mitigate the negative impact of a future pandemic, which many scientists say is not a matter of if but of when.^[Robbins, J. (2021, January 4). Heading Off the Next Pandemic. Kaiser Health News. https://khn.org/news/infectious-disease-scientists-preventing-next-pandemic/. ]
+**Background.** Under the two-party system, the political divide in the United States between right and left has grown rapidly. In the past, Americans have identified more closely with moderate political ideologies. However, according to a study conducted by Pew Research Center in 2014, the percentage of Americans who consider themselves to be strict conservatives or liberals has risen from 10% to 21% over the past 20 years.^[“Political Polarization in the American Public.” https://www.pewresearch.org/politics/2014/06/12/political-polarization-in-the-american-public/. 
+] Moreover, the ideological gap between the political left and right has grown as well - the same study pointed to a shrinking list of issues that parties see eye-to-eye on as a symptom of this growing partisanship.^[Ibid.] Interestingly, upon analyzing public opinion in other democracies, this seems to be a uniquely American trend. Americans’ opinions of members of the opposing political parties have worsened faster than between citizens in countries like Canada, Australia, Germany, and the U.K.^[“U.S. is polarizing faster than other democracies, study finds.” https://www.brown.edu/news/2020-01-21/polarization]
 
-Past research has shown that infectious diseases are influenced by a variety of factors. Obesity, for instance, is associated with a higher likelihood of contracting influenza A, and seasonal temperature changes have shown to be predictive of the 2003 severe acute respiratory syndrome (SARS).^[Tian, T., Zhang, J., Hu, L., Jiang, Y., Duan, C., Li, Z., ... & Zhang, H. (2021). Risk factors associated with mortality of COVID-19 in 3125 counties of the United States. Infectious diseases of poverty, 10(1), 1-8.] The CDC is currently in the process of identifying potential risk factors for severe COVID-19 illness,^[Centers for Disease Control and Prevention. (n.d.). Assessing Risk Factors for Severe COVID-19 Illness. Centers for Disease Control and Prevention. https://www.cdc.gov/coronavirus/2019-ncov/covid-data/investigations-discovery/assessing-risk-factors.html.] and some that have already been identified include heart disease, diabetes, and pregnancy.^[Centers for Disease Control and Prevention. (n.d.). Certain Medical Conditions and Risk for Severe COVID-19 Illness. Centers for Disease Control and Prevention. https://www.cdc.gov/coronavirus/2019-ncov/need-extra-precautions/people-with-medical-conditions.html.] Yet despite these efforts, there is still much to be learned. Specifically, there is still insufficient research to explain the differences in COVID-19 susceptibility and mortality that exist not just on the individual level but also on broader population levels. 
+Simultaneously, key shifts in demographic and socioeconomic trends in the U.S. have important political implications. An aging population, unprecedented racial and ethnic diversity, and projections for sharp increases in immigration in the coming years are changing the makeup of the American voting population. Additionally, Americans find themselves grappling with a variety of modern issues. As the wealth gap widens, median household incomes have yet to reach their pre-recession level.^[“Trends in Income and Wealth Inequality.” https://www.pewresearch.org/social-trends/2020/01/09/trends-in-income-and-wealth-inequality/]. Health disparities, inequitable access to education, and racial discrimination are all social challenges that affect how American voters approach politics.^[“Views of the major problems facing the country.” https://www.pewresearch.org/politics/2019/12/17/views-of-the-major-problems-facing-the-country/]
 
-**Analysis goals.** Given our knowledge of the capacity for a variety of factors to influence infectious disease spread as well as the fact that different counties in the US have differing levels of baseline health factors, we sought to investigate how rates of COVID-19 cases and deaths across the US are affected by various measures of community health. Specifically, we were interested in which kinds of factors (e.g., clinical, behavioral, health)—and which specific variables—are most predictive of deaths per cases (also known as case fatality rate). 
+These coinciding political and demographic trends play out on the election stage, shaping how politicians and policymakers should interact with their constituents, and revealing what matters most to American voters. 
 
-**Significance.** We hope that our analysis will contribute to the growing body of research on COVID-19 risk factors by expanding our understanding of COVID-19 and supporting efforts to mitigate the risk of future pandemics. Our results also shed light on the importance of analyzing social determinants of health in efforts to improve health outcomes. 
+**Analysis goals.**In light of the amount of political diversity across the U.S., the rise in ideology-based partisanship, and the variety of factors that determine party identification, our objective for this analysis was to understand how county-level results from the 2020 presidential election were affected by various health, demographic, and socioeconomic characteristics. We sought to identify the variables in these categories that best predict which party wins in each county. 
+
+**Significance.** By identifying the key factors that help determine winning political parties in different regions in the U.S., we hope to shed new light on the issue of political polarization; our analysis points to issues that are important political conflicts, lending insight into how to build bridges in an increasingly hostile political environment.
 
 # Data
 
@@ -97,67 +99,197 @@ read_tsv("../results/top-10-counties-data.tsv") %>%
 
 ### Features
 
-[Omitted from template.]
+After understanding the variation in some of the individual features, we wanted to check for potential multicollinearity issues by looking at the covariation between features. In order to do this, we examined the correlation coefficients between the numerical features (all features in the dataset are numerical except 1).
+
+```{r top-5-pos-corr, message = FALSE, echo = FALSE}
+read_tsv("../results/ordered_corrDF.tsv")[-1,] %>%
+  tail(5)
+  kable(format = "latex", row.names = NA, 
+        booktabs = TRUE, digits = 2, 
+        col.names = c("Feature 1", "Feature 2", "Correlation Coefficient"),
+        caption = "Top ten most positively correlated feature pairs") %>%
+  kable_styling(position = "center")
+```
+
+```{r top-5-neg-corr, message = FALSE, echo = FALSE}
+read_tsv("../results/ordered_corrDF.tsv")[-1,] %>%
+  head(5)
+  kable(format = "latex", row.names = NA, 
+        booktabs = TRUE, digits = 2, 
+        col.names = c("Feature 1", "Feature 2", "Correlation Coefficient"),
+        caption = "Top ten most negatively correlated feature pairs") %>%
+  kable_styling(position = "center")
+```
+
+As we discussed earlier, our features fall into natural categories relating to the health, demographic, and socioeconomic information of each county's residents. We defined a strong correlation as one where the correlation coefficient is greater thatn 0.7 or less than -0.7. From calculating these correlation coefficients, it seems like the feature pairs with the highest absolute correlation coefficients often fall into the same category. For example, `pct_high_school_diploma` and `pct_bachelors_or_higher` have a strong negative correlation, likely because they imply opposite conclusions, and are both related to education. We used this insight to inform our model selection, opting for penalized regressions that drop or diminish features that don't meet a certain threshold, and tree models that circumvent multicollinearity issues altogether. 
+
+### Response vs. Features
+Since our response variable was categorical, and the majority of our explanatory variables were numerical, it was difficult to get a snapshot of the potential relationships through something like a correlation matrix. Instead, since we observed that features lying in the same natural categories (e.g. health, demographics, etc.) tended to have moderate to strong correlations with each other, we decided to pick a few features from each category to plot against the response. 
+
+*Health*
+```{r health-box, out.width = "80%", fig.cap = "Distribution of health scores by leading party", fig.align='center', echo = FALSE}
+knitr::include_graphics("results/health-box.png")
+```
+
+High health score indicates a fair standard of health among residents across the county, while a low health score indicates a poor standard of health among residents across the county. This graph shows quite a bit of overlap between parties, but the mean health score for Democrat-won counties is slightly lower than for Republican-won counties. This is especially interesting given how many outliers there are towards the right end of the distribution (i.e. the high scores) for Democrat-won counties.
+
+*COVID*
+```{r mask-bar, out.width = "80%", fig.cap = "Distribution of mask survey responses by leading party", fig.align='center', echo = FALSE}
+knitr::include_graphics("results/mask-bar.png")
+```
+
+The variables in these graphs come from survey data about residents’ mask habits in response to the COVID-19 pandemic. It is interesting to note that the mean proportion of people who responded “Always” is higher in Democrat-won counties than in Republican-won counties. However, the difference seems small, and the mean proportion of “Always” responses is higher for counties won by both parties than the mean proportion of any other response. 
+
+*Demographic/Socioeconomic*
+a) Education
+```{r edu-box, out.width = "80%", fig.cap = "Distribution of % bach. degree holders by leading party", fig.align='center', echo = FALSE}
+knitr::include_graphics("results/edu-box.png")
+```
+
+According to this boxplot, in Democrat-won counties, the average percentage of bachelor or advanced degree holders seems to be higher than in Republican-won counties; interestingly, there seem to be quite a few outliers to the right end of the distribution for Republican-won counties, indicating that in some instances, highly-educated citizens vote Republican.
+
+b) Race/Ethnicity
+```{r race-plots, out.width = "80%", fig.cap = "Distribution of race/ethnicity by leading party", fig.align='center', echo = FALSE}
+knitr::include_graphics("results/race-plots.png")
+```
+
+Notably, there seems to be quite a bit of overlap between Democrat- and Republican-won counties for all races/ethnicities except for Asian residents; here, there seems to be a stark contrast where counties with higher percentages of Asian residents tend to go blue, whereas counties with lower percentages tend to go red.
+ 
 
 # Modeling
 
 ## Regression-based methods
 
-### Ordinary least squares
+###Logistic Regression
+*Training*
+As a baseline model, we began by building a logistic regression. We used the training set to fit a model that regressed `leading_party` on all the other variables in the dataset. During our exploratory analysis, there were a few variables whose distributions demonstrated high skewness. We decided to perform a log transformation on these variables so that they approached a more normal distribution. 
 
-[Omitted from template.]
-
-### Penalized regression
-
-Despite the ordinary least squares method seeming to work well, we realized that fitting a linear model with so many explanatory variables might incur a large cost in variance and lead to suboptimal predictions. Hence, we decided to build and evaluate shrinkage models with the hopes of getting a more parsimonious and interpretable model. We ran three cross-validated regressions for which optimal values of lambda were chosen according to the one-standard-error rule: ridge, LASSO (Least Absolute Shrinkage and Selection Operator), and elastic net. 
-
-For the lasso, Figure \@ref(fig:lasso-CV-plot) shows the CV plot, Figure \@ref(fig:lasso-trace-plot) shows the trace plot, and Table \@ref(tab:lasso-coefficients) shows the selected features and their coefficients. 
-
-[Interpretation of lasso omitted from this template. Other penalized regression methods omitted from this template.]
-
-
-```{r lasso-CV-plot, out.width = "90%", fig.cap = "Lasso CV plot.", fig.align='center', echo = FALSE}
-knitr::include_graphics("../results/lasso-cv-plot.png")
-```
-
-```{r lasso-trace-plot, out.width = "90%", fig.cap = "Lasso trace plot.", fig.align='center', echo = FALSE}
-knitr::include_graphics("../results/lasso-trace-plot.png")
-```
-
-```{r lasso-coefficients, message = FALSE, echo = FALSE}
-read_tsv("../results/lasso-features-table.tsv") %>%
-  kable(format = "latex", row.names = NA, 
-        booktabs = TRUE, digits = 2, 
-        col.names = c("Feature", "Coefficient"),
-        caption = "Standardized coefficients for features in the lasso 
-        model based on the one-standard-error rule.") %>%
+*Interpretation*
+The logistic regression contains 46 total parameters, excluding the intercept. Setting $\alpha = 0.05$, there are 17 variables whose p-values meet that level of significance:
+`adult_smoking`, `pct_below_18`, `pct_above_65`, `pct_nonhispanic_black`, `pct_native_american`, `pct_hispanic`, `pct_females`, `pct_nonproficient_english`, `physical_inactivity`, `pct_asian`, `pct_nonhispanic_white`, `social_associations`, `urban_rural_descMedium metro`, `urban_rural_descMicropolitan`,`pct_covid_deaths`, `log_poverty_rating`, `pct_voters`
+```{r model-evaluation, message = FALSE, echo = FALSE}
+read_txt("results/glm-coef-p.txt") %>%
+  kable(format = "latex", row.names = NA,
+        booktabs = TRUE, digits = 2,
+        caption = "Summary of logistic regression coefficients, standard errors, 
+        and p-values") %>%
   kable_styling(position = "center")
 ```
 
-## Tree-based methods
+It is interesting to see that many of the race/ethnicity variables are significant predictors of election results, given the trend we noticed between `leading_party` and `pct_asian`. However, one potential concern is that more than half the variables are not statistically significant at even $\alpha = 0.10$ despite having very high coefficient values. This is a sign that multicollinearity could be at play, a potential risk we noted in our exploratory analysis when certain features demonstrated strong correlations with each other. 
 
-[Omitted from template.]
+###Penalized regression methods 
+*Training & Tuning*
+The baseline logistic regression yielded several significant predictors, but with 46 parameters, there was high overfitting potential when it came to the test data. In order to balance the bias-variance tradeoff, and additionally to deal with the multicollinearity issues, we decided to apply two penalized methods: ridge and LASSO classifiers. We trained these cross-validated models on the same training dataset used to construct our earlier logistic regression. Additionally, for each model, we selected the tuning parameter $\lambda$ according to the one standard error rule. Following this training and tuning process, the LASSO model contained the following 21 predictors:
+`homeownership`,`pct_bachelors_or_higher`,`always`,`log_poverty_rating`,`unemployment_rate`,`physical_inactivity`,`pct_nonhispanic_black`,`pct_voters`,`pct_nonhispanic_white`,`diabetes_prevalence`,`pct_asian`,`pct_covid_deaths`,`sometimes`,`log_traffic_volume`,`pct_above_65`, `pct_females`, `frequently`, `severe_housing_issues`, `pct_below_18`, `excessive_drinking`, `pct_college_associates`. 
+
+*Interpretation*
+Looking at the trace plots for the ridge and LASSO models, which highlight the top 6 most important features, it is interesting to examine the overlap across the three regression-based methods we used to approach this problem.
+
+```{r ridge-trace, out.width = "80%", fig.cap = "Ridge Trace Plot", fig.align='center', echo = FALSE}
+knitr::include_graphics("results/ridge-trace-plot.png")
+```
+
+```{r lasso-trace, out.width = "80%", fig.cap = "LASSO Trace Plot", fig.align='center', echo = FALSE}
+knitr::include_graphics("results/lasso-trace-plot.png")
+```
+
+Notably, three features show up in the top 6 most important features for both the LASSO and ridge classifiers: `homeownership`, `pct_bachelors_or_higher`, `log_poverty_rate`. Of these predictors `log_poverty_rate` was also a statistically significant predictor in the logistic regression. This overlap points to certain demographic/socioeconomic indicators, especially relating to education and income level, as particularly important in determining political party. 
+
+##Tree methods
+In addition to our regression-based methods, we also wanted to use a few tree-based models to attempt this classification question. Given our initial challenge with the logistic regression’s requirement regarding multicollinearity, tree methods seemed like an appropriate next step. Given that the trees involved in these models are formed based not on assumptions about how the explanatory and response variables are related, but on an impurity measure at each split, these methods successfully avoid multicollinearity. This is especially helpful given the way our data falls into natural groupings. 
+
+### Decision tree
+*Training & Tuning*
+We started out by constructing some classification trees to gain further insight into the relationship between the features and the response. This was our baseline classification tree:
+
+```{r default-tree, out.width = "80%", fig.cap = "Default Tree", fig.align='center', echo = FALSE}
+knitr::include_graphics("results/default-tree.png")
+```
+
+The `pct_asian` variable is at the root node, reinforcing its importance as a predictor of `leading_party` as noted in the exploratory analysis, and further solidified through the regression-based models.
+
+*Interpretation*
+To avoid increasing bias by pruning this default tree, we fit the deepest possible tree. We then cross-validated and used the one standard error rule to pick the number of terminal nodes that would result in the optimal tree. This was the optimal tree:
+
+```{r optimal-tree, out.width = "80%", fig.cap = "Optimal Tree", fig.align='center', echo = FALSE}
+knitr::include_graphics("results/optimal-tree-plot.png")
+```
+
+Once again, the reappearance of several features that were important in previous models reinforces our earlier results.
 
 ### Random forest
+*Training and Tuning*
+Next, using the same training set, we fit a random forest model. In this case, there were two key tuning parameters: 
+`mtry`, which represents the number of variables the model randomly samples to pick each split 
+`ntree`, which represents the number of trees that should be used in determining each prediction
+In order to tune the random forest according to these parameters, we measured the out-of-bag error associated with different values of each parameter. The out-of-bag (OOB) error measures how well the random forest is able to predict values not included in the bootstrap samples used to train the forest. In this way,  OOB error acts as a validation mechanism for the random forest model. 
+
+```{r m-OOB-err-plot, out.width = "80%", fig.cap = "OOB Error vs. Mtry Parameter", fig.align='center', echo = FALSE}
+knitr::include_graphics("results/m-OOB-err-plot.png")
+```
+
+Here we see that the optimal `mtry` value is 29, because that is where OOB error is minimized.
+
+```{r def-OOB-err-plot, out.width = "80%", fig.cap = "OOB Error vs. Number of Trees", fig.align='center', echo = FALSE}
+knitr::include_graphics("results/def-OOB-plot.png")
+```
+
+Similarly, we see that OOB error begins to stabilize as `ntrees` approaches 500, meaning this is the optimal value for that parameter. 
+
+*Interpretation*
+In order to answer our research question, it is important to understand which variables the model highlights as important. With random forests, variable importance is determined by two key measures: mean decrease in accuracy, and mean decrease in Gini coefficient. The first signifies how much the model would lose in terms of accuracy by excluding a certain variable, and the second signifies how much a certain variable decreases impurity at a certain node.  
+
+```{r rf-varimp, out.width = "80%", fig.cap = "Variable Importance", fig.align='center', echo = FALSE}
+knitr::include_graphics("results/rf-varimp.png")
+```
+
+Looking at the variable importance plots, it is interesting to see how much the two overlap with each other, and how much these rankings overlap with the variable importance expressed by previous models. The following are variables that not only meet both of metrics of variable importance set out by the random forest model, but were also among the most 
+important/significant features in previous models:
+`log_traffic_volume`, `log_poverty_rating`, `pct_asian`, `always`, `homeownership`
+These variables reveal insight into a county’s socioeconomic status, racial/ethnic composition, and COVID-19 reaction. Importantly, they also convey the particular relevance of these issues to election results. 
 
 ### Boosting
+*Training & Tuning*
+Lastly, we used our training dataset to fit a boosted model, which works by aggregating the predictions of multiple weak learners to form a strong predictive ability. Here, our key tuning parameter was interaction depth - this determines the maximum number of nodes for a decision tree. We tested interaction depths of 1, 2, and 3, plotting the number of trees at each depth against the cross-validation error to determine the optimal depth. We determined this value to be 3. Cross-validation error is minimized at an interaction depth of 3 and 133 trees. 
+
+```{r gbm-CV-errs, out.width = "80%", fig.cap = "Variable Importance", fig.align='center', echo = FALSE}
+knitr::include_graphics("results/gbm_CV_errs.png")
+```
+
+*Interpretation*
+According to relative influence, the top three most important features in the boosted model are:
+`log_traffic_volume`, `log_poverty_rating`, and `severe_housing_issues`. Once again, these features overlap with important features highlighted by our earlier models. 
+```{r rel-inf, message = FALSE, echo = FALSE}
+read_tsv("results/gbm-rel-inf.tsv") %>%
+  kable(format = "latex", row.names = NA,
+        booktabs = TRUE, digits = 2,
+        caption = "Relative Influence") %>%
+  kable_styling(position = "center")
+```
+
+Taking these variables, we proceeded to create partial dependence plots. These plots demonstrate the marginal effect of a feature on the response variable. In the case of `log_traffic_volume`, we can see that as the log of the average traffic volume per meter of major roadways in the county increases, the election result is more likely to be Democrat. Similarly, with relation to the other plots, the election result also becomes more likely to be Democrat as the log of a county’s poverty rating increases; as the proportion of the county facing severe housing issues or homelessness increases, so does the likelihood that the election result is Democrat. 
+
+```{r part-dep-plots, out.width = "80%", fig.cap = "Variable Importance", fig.align='center', echo = FALSE}
+knitr::include_graphics("results/part-dep-plots.png")
+```
+
+Taking a holistic view of the relationship between these three variables and the response, it seems like counties lacking access to robust public infrastructure seem to lean Democrat. It is possible, at least from the residents’ point of view, that the Democratic Party’s policy agenda is better suited to address the challenges arising from high levels of poverty, homelessness, and even traffic congestion. 
+
 
 # Conclusions
 
 ## Method comparison
 
 ```{r model-evaluation, message = FALSE, echo = FALSE}
-read_tsv("../results/model-evaluation.tsv") %>%
+read_csv("results/model-evaluation.csv") %>%
   kable(format = "latex", row.names = NA,
         booktabs = TRUE, digits = 2,
-        caption = "Root-mean-squared prediction errors for lasso and ridge regressions.") %>%
+        caption = "Misclassification Errors") %>%
   kable_styling(position = "center")
 ```
 
-Table \@ref(tab:model-evaluation) shows the test RMSE for all the methods considered. Except for the OLS, the random forest and the boosted model have the lowest test errors. This is reasonable given these models’ tendencies to have high predictive accuracy. Between the two, the boosted model has the lowest test error, with a mean squared error of 0.000139, but it is closely followed by random forest, which has a mean squared error of 0.00141. Notably, however, the ridge, LASSO, and elastic net regressions perform about as well, with test MSEs of 0.000158, 0.000164, and 0.000161, respectively. Although OLS has the lowest training and test error, its adjusted R-squared value was only about 0.3, and there were too many features given the number of observations.
-
-Regardless of these differences in test MSE, the methods overlap significantly in their identification of important variables from the larger set. For instance, the elastic net regression selects the following variables, which are also selected by LASSO and deemed significant in the OLS model: other providers ratio, unemployment, income inequality, housing overcrowding, residential segregation—non-White/White, homeownership, and physical inactivity. The random forest and boosting models both include low birthweight percentage, median income, and unemployment percentage in the top 10 most important variables, as measured by their contributions to node purity. 
-
+Table \@ref(tab:model-evaluation) 
 
 ## Takeaways
 

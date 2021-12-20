@@ -61,6 +61,8 @@ optimal_tree_info
 optimal_tree = prune(tree = T_0, cp = optimal_tree_info$CP)
 #Save optimal tree
 save(optimal_tree, file = "results/dtr.Rda")
+optimal_tree_plot = rpart.plot(optimal_tree)
+
 ###Random Forest
 ##Default random forest
 #fit
@@ -69,6 +71,11 @@ rf_fit = randomForest(factor(leading_party) ~ ., data = train)
 #OOB error
 def_OOB_plot = tibble(oob_error = rf_fit$err.rate[,"OOB"],trees = 1:500) %>%
   ggplot(aes(x = trees, y = oob_error)) + geom_line() + theme_bw()
+ggsave(filename = "results/def_OOB_plot.png", 
+       plot = def_OOB_plot, 
+       device = "png", 
+       width = 6, 
+       height = 4)
 
 ##Tuning the random forest
 #identify best value of m
@@ -95,10 +102,15 @@ m_OOB_err_plot = m_OOB_err %>%
   geom_point() + geom_text(aes(label=m,hjust=2, vjust=1)) +
   xlab("Value of m") + ylab("OOB Error") +
   theme_bw()
+ggsave(filename = "results/m_OOB_err_plot.png", 
+        plot = m_OOB_err_plot, 
+        device = "png", 
+        width = 6, 
+        height = 4)
 #tune using optimal m
 set.seed(471) # for reproducibility (DO NOT CHANGE)
 rf_fit3 = randomForest(factor(leading_party) ~ .,
-                       mtry = 15,
+                       mtry = 29,
                        importance = TRUE,
                        data = train)
 #OOB error plot w/ optimal m
@@ -108,7 +120,7 @@ optimal_OOB_err_plot = tibble(oob_error = rf_fit3$err.rate[,"OOB"],trees = 1:500
 #Save optimal fit
 save(rf_fit3, file = "results/rf_fit.Rda")
 
-###XGBoost
+###Boosting
 ##Fit boosted tree models with interaction depths 1, 2, and 3
 set.seed(471) # for reproducibility (DO NOT CHANGE)
 #interaction depth 1
@@ -158,9 +170,15 @@ gbm_CV_errs = CV_errors %>%
   geom_hline(yintercept=min(CV_errors$CV_3),linetype = 'dashed') +
   xlab("Number of Trees") + ylab("CV error") +
   theme_bw()
+
+ggsave('results/gbm_CV_errs.png',
+       plot = gbm_CV_errs, 
+       device = "png", 
+       width = 6, 
+       height = 4)
 #Optimal number of trees
-gbm_fit_optimal = gbm_fit1
-optimal_num_trees = gbm.perf(gbm_fit1, plot.it = FALSE)
+gbm_fit_optimal = gbm_fit3
+optimal_num_trees = gbm.perf(gbm_fit3, plot.it = FALSE)
 
 ##Need to save optimal num trees
 optimal_num_trees
@@ -176,18 +194,23 @@ var_imp = varImpPlot(rf_fit3,n.var=10)
 ##Boosting
 #Relative Influence
 rel_inf = summary(gbm_fit_optimal, n.trees = optimal_num_trees, plotit = FALSE)[1:10,] %>%
-  as_tibble() 
+  as_tibble() %>% write_tsv("results/gbm-rel-inf.tsv")
 
 #Partial dependence plots
 #p1
-p1 = plot(gbm_fit_optimal, i.var = "pct_asian", n.trees = optimal_num_trees)
+p1 = plot(gbm_fit_optimal, i.var = "log_traffic_volume", n.trees = optimal_num_trees)
 
 #p2
-p2 = plot(gbm_fit_optimal, i.var = "log_traffic_volume", n.trees = optimal_num_trees)
+p2 = plot(gbm_fit_optimal, i.var = "log_poverty_rating", n.trees = optimal_num_trees)
 
 #p3
-p3 = plot(gbm_fit_optimal, i.var = "always", n.trees = optimal_num_trees)
+p3 = plot(gbm_fit_optimal, i.var = "severe_housing_issues", n.trees = optimal_num_trees)
 
-plot_grid(p1,p2,p3)
+part_dep_plots = plot_grid(p1,p2,p3)
+ggsave('results/part-dep-plots.png',
+       plot = part_dep_plots, 
+       device = "png", 
+       width = 6, 
+       height = 4)
 
 rm(list=ls())
