@@ -20,7 +20,12 @@ beta_hat_std = as.data.frame(coef(glm_fit)) %>% rownames_to_column("feature") %>
 # save the glm fit object
 save(glm_fit, file = "results/glm_fit.Rda")
 
-# extract features selected by glm and their coefficients
+# extract features, coefficients, p-values
+summary = summary(glm_fit)
+summary$coefficients %>%
+  write.table('results/glm-coef-p.txt')
+
+# extract features 
 beta_hat_std[-1,] %>%
   arrange(desc(abs(coefficient))) %>% 
   write_tsv("results/glm-features-table.tsv")
